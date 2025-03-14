@@ -72,8 +72,11 @@ const NextLocationSelector = ({ locations, projectId, onBack }: NextLocationSele
       // Create a report for this project
       const reportData = {
         projectId,
-        notes: `Completed project with ${locations.length} GroupIDs and ${totalBarcodes} total barcodes`,
-        status: "completed"
+        name: `Project Report - ${new Date().toLocaleDateString()}`,
+        type: "excel",  // Default to excel type
+        emailCopy: false,
+        syncAfter: true,
+        showPdf: false
       };
       
       const response = await apiRequest("POST", "/api/reports", reportData);
