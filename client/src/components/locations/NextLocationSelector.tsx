@@ -13,7 +13,10 @@ const NextLocationSelector = ({ locations, projectId, onBack }: NextLocationSele
 
   // Handle add next location button click
   const handleAddNextLocation = () => {
+    console.log("Adding next location, projectId:", projectId);
+    
     if (projectId) {
+      // This path matches the route in App.tsx
       navigate(`/projects/${projectId}/add-location`);
     } else {
       navigate('/add-location');

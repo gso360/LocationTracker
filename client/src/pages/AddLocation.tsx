@@ -400,7 +400,7 @@ const AddLocation = () => {
   if (showLocationSelector) {
     return <NextLocationSelector 
       locations={allLocations} 
-      projectId={projectId}
+      projectId={projectId ? Number(projectId) : undefined}
       onBack={() => {
         setShowLocationSelector(false);
         if (projectId) {
