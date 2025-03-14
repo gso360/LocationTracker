@@ -88,7 +88,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
       {!imageData ? (
         <div className="bg-white rounded-lg shadow mb-6 overflow-hidden">
           <div className="p-4 border-b">
-            <h3 className="font-medium">Capture Location Photo</h3>
+            <h3 className="font-medium">Capture GroupID Photo</h3>
           </div>
           
           <div className="bg-gray-900 aspect-video flex items-center justify-center">
@@ -110,7 +110,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
       ) : (
         <div className="bg-white rounded-lg shadow mb-6 overflow-hidden">
           <div className="p-4 border-b flex justify-between items-center">
-            <h3 className="font-medium">Location Photo</h3>
+            <h3 className="font-medium">GroupID Photo</h3>
             <button 
               onClick={handleCapturePhoto}
               className="text-[#2962FF] text-sm flex items-center"
@@ -123,7 +123,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
           <div className="aspect-video bg-gray-200">
             <img 
               src={imageData} 
-              alt="Location preview" 
+              alt="GroupID preview" 
               className="w-full h-full object-cover" 
             />
           </div>
@@ -135,7 +135,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
         <div className="p-4 border-b">
           <h3 className="font-medium">Scan Product Barcodes</h3>
           <p className="text-sm text-gray-500">
-            Scan one or more product barcodes to associate with this GroupID location.
+            Scan one or more product barcodes to associate with this GroupID.
           </p>
         </div>
         

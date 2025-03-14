@@ -85,7 +85,7 @@ export default function ProjectLocations() {
       )}
 
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">GroupID Locations</h2>
+        <h2 className="text-xl font-semibold">GroupIDs</h2>
         <Button onClick={() => setLocation(`/projects/${projectId}/add-location`)}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add New GroupID
@@ -94,7 +94,7 @@ export default function ProjectLocations() {
 
       {isLocationsLoading ? (
         <div className="text-center">
-          <p>Loading locations...</p>
+          <p>Loading GroupIDs...</p>
         </div>
       ) : locations.length === 0 ? (
         <div className="text-center py-8">

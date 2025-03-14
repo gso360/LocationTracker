@@ -251,10 +251,10 @@ const AddLocation = () => {
           className="flex items-center text-[#455A64] mb-2"
         >
           <ArrowLeft className="h-5 w-5 mr-1" />
-          Back to Locations
+          Back to GroupID List
         </button>
         <h2 className="text-xl font-medium text-[#455A64]">
-          {locationId ? 'Edit Location' : 'Add New Location'}
+          {locationId ? 'Edit GroupID' : 'Add New GroupID'}
         </h2>
       </div>
       
