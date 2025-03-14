@@ -268,35 +268,128 @@ const AddLocation = () => {
     return <BarcodeScanner 
       onScan={handleBarcodeScanned} 
       onClose={() => {
+        // First mark the scanner as closed to prevent re-renders
         setShowScanner(false);
         
-        // Only proceed with save if we have barcodes and a location name
+        // Only proceed with save if we have barcodes and a valid GroupID name
         if (barcodes.length > 0 && locationName.trim()) {
-          // After finishing barcode scanning, auto save the location data
-          handleSaveLocation()
-            .then((savedData) => {
-              // After saving, show the location selector so user can choose what to do next
+          toast({
+            title: "Saving GroupID...",
+            description: "Please wait while we save your data.",
+          });
+          
+          // Simplified auto-save approach
+          const saveAsync = async () => {
+            try {
+              // Create or update the location
+              const locationData: any = {
+                name: locationName.trim(),
+                notes: locationNotes.trim() || null,
+                pinPlacement: pinPlacement.trim() || null,
+                imageData: imageData,
+              };
+              
+              // Add project ID to new locations if specified
+              if (projectId && !locationId) {
+                locationData.projectId = projectId;
+              }
+              
+              let savedLocationData;
+              
+              if (locationId) {
+                // Update existing location
+                const response = await apiRequest("PATCH", `/api/locations/${locationId}`, locationData);
+                savedLocationData = await response.json();
+              } else {
+                // Create new location
+                const response = await apiRequest("POST", "/api/locations", locationData);
+                savedLocationData = await response.json();
+              }
+              
+              // If we're creating a new location, also save the barcodes
+              if (!locationId) {
+                // Save barcodes
+                await Promise.all(
+                  barcodes.map(value => 
+                    apiRequest("POST", "/api/barcodes", {
+                      value,
+                      locationId: savedLocationData.id,
+                    })
+                  )
+                );
+              } else {
+                // If editing, first get existing barcodes
+                const existingBarcodesResponse = await apiRequest("GET", `/api/locations/${locationId}/barcodes`);
+                const existingBarcodesData = await existingBarcodesResponse.json();
+                
+                // Delete barcodes that are no longer in the list
+                await Promise.all(
+                  existingBarcodesData
+                    .filter((b: Barcode) => !barcodes.includes(b.value))
+                    .map((b: Barcode) => apiRequest("DELETE", `/api/barcodes/${b.id}`))
+                );
+                
+                // Add new barcodes
+                await Promise.all(
+                  barcodes
+                    .filter(value => !existingBarcodesData.some((b: Barcode) => b.value === value))
+                    .map(value => 
+                      apiRequest("POST", "/api/barcodes", {
+                        value,
+                        locationId: savedLocationData.id,
+                      })
+                    )
+                );
+              }
+              
+              // Refresh the relevant query caches
               queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
+              
               if (projectId) {
                 queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'locations'] });
               }
+              
+              toast({
+                title: "GroupID saved successfully",
+                description: "Choose your next GroupID to scan.",
+              });
+              
+              // Show location selector for next steps
               setShowLocationSelector(true);
-            })
-            .catch((error) => {
-              // If there's an error, navigate back to list
-              if (projectId) {
-                navigate(`/projects/${projectId}`);
-              } else {
-                navigate("/");
-              }
-            });
+            } catch (error) {
+              toast({
+                title: "Error",
+                description: "Failed to save GroupID. Going back to list.",
+                variant: "destructive",
+              });
+              
+              // If there's an error, navigate back to list after a short delay
+              setTimeout(() => {
+                if (projectId) {
+                  navigate(`/projects/${projectId}`);
+                } else {
+                  navigate("/");
+                }
+              }, 1500);
+            }
+          };
+          
+          // Start the async operation
+          saveAsync();
         } else {
-          // If we don't have barcodes, just go back to the previous screen
-          if (projectId) {
-            navigate(`/projects/${projectId}`);
-          } else {
-            navigate("/");
-          }
+          // If we don't have barcodes or a name, just go back to the previous screen
+          toast({
+            title: "No data to save",
+            description: "Going back to GroupID list.",
+          });
+          
+          setTimeout(() => {
+            if (projectId) {
+              navigate(`/projects/${projectId}`);
+            } else {
+              navigate("/");
+            }
+          }, 1000);
         }
       }} 
       existingBarcodes={barcodes} 
