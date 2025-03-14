@@ -5,7 +5,11 @@ import "./index.css";
 // Register service worker for PWA support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
+    // Fix: The server doesn't serve files from the direct root in development
+    // So we need to access them from the correct path
+    const swPath = import.meta.env.DEV ? './service-worker.js' : '/service-worker.js';
+    
+    navigator.serviceWorker.register(swPath)
       .then(registration => {
         console.log('Service Worker registered with scope:', registration.scope);
       })
