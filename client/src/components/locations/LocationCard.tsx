@@ -29,13 +29,13 @@ const LocationCard: React.FC<LocationCardProps> = ({ location }) => {
       await apiRequest("DELETE", `/api/locations/${location.id}`);
       queryClient.invalidateQueries({ queryKey: ["/api/locations"] });
       toast({
-        title: "Location deleted",
-        description: "The location has been removed successfully.",
+        title: "GroupID deleted",
+        description: "The GroupID has been removed successfully.",
       });
     } catch (error) {
       toast({
         title: "Failed to delete",
-        description: "Could not delete the location. Please try again.",
+        description: "Could not delete the GroupID. Please try again.",
         variant: "destructive",
       });
     }
@@ -51,7 +51,7 @@ const LocationCard: React.FC<LocationCardProps> = ({ location }) => {
       <div className="p-4">
         <div className="flex justify-between items-start mb-3">
           <div>
-            <h3 className="text-lg font-medium">Location #{location.name}</h3>
+            <h3 className="text-lg font-medium">GroupID #{location.name}</h3>
             <p className="text-sm text-gray-500">
               {location.barcodes.length} {location.barcodes.length === 1 ? "barcode" : "barcodes"}
             </p>
@@ -89,7 +89,7 @@ const LocationCard: React.FC<LocationCardProps> = ({ location }) => {
           {location.imageData ? (
             <img 
               src={location.imageData}
-              alt={`Location #${location.name}`} 
+              alt={`GroupID #${location.name}`} 
               className="w-full h-full object-cover"
             />
           ) : (

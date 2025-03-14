@@ -121,7 +121,7 @@ const AddLocation = () => {
     if (!locationName.trim()) {
       toast({
         title: "Error",
-        description: "Location name is required.",
+        description: "GroupID name is required.",
         variant: "destructive",
       });
       return;
