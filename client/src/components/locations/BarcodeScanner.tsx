@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { X, QrCode, Check, Bluetooth, ListChecks } from "lucide-react";
+import { useBluetoothBarcode, BarcodeListener } from "./BluetoothBarcodeManager";
 
 interface BarcodeScannerProps {
   onScan: (value: string) => void;
@@ -295,9 +296,23 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existi
   const [showBarcodeInput, setShowBarcodeInput] = useState(false);
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [scannedCount, setScannedCount] = useState(0);
+  const { startListening, stopListening } = useBluetoothBarcode();
   
   // Handle barcode entry from continuous scanner
   const handleBarcodeEntry = (value: string) => {
+    // Prevent processing duplicates
+    if (existingBarcodes.includes(value)) {
+      // Show duplicate notification
+      setLastScannedBarcode(value);
+      setNotificationVisible(true);
+      
+      // Hide notification after 2 seconds
+      setTimeout(() => {
+        setNotificationVisible(false);
+      }, 2000);
+      return;
+    }
+    
     // Show success notification
     setLastScannedBarcode(value);
     setNotificationVisible(true);
@@ -311,6 +326,19 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existi
     // Pass the barcode to parent component
     onScan(value);
   };
+  
+  // Start listening when in barcode scanning mode
+  useEffect(() => {
+    if (showBarcodeInput) {
+      startListening(handleBarcodeEntry);
+    } else {
+      stopListening();
+    }
+    
+    return () => {
+      stopListening();
+    };
+  }, [showBarcodeInput, startListening, stopListening]);
   
   return (
     <div className="h-full flex flex-col">

@@ -10,6 +10,7 @@ import AddLocation from "./pages/AddLocation";
 import Projects from "./pages/Projects";
 import ProjectLocations from "./pages/ProjectLocations";
 import MobileQRCode from "./components/MobileQRCode";
+import BluetoothBarcodeProvider from "./components/locations/BluetoothBarcodeManager";
 
 function Router() {
   return (
