@@ -31,13 +31,15 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AppLayout>
-        <Router />
-      </AppLayout>
-      <Toaster />
-      <div id="mobile-qr">
-        <MobileQRCode />
-      </div>
+      <BluetoothBarcodeProvider>
+        <AppLayout>
+          <Router />
+        </AppLayout>
+        <Toaster />
+        <div id="mobile-qr">
+          <MobileQRCode />
+        </div>
+      </BluetoothBarcodeProvider>
     </QueryClientProvider>
   );
 }
