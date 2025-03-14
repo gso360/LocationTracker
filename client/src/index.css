@@ -9,6 +9,21 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    /* iOS overscroll effect */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Safari iOS specific styling */
+  @supports (-webkit-touch-callout: none) {
+    body {
+      /* Prevent element highlighting on tap */
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Proper padding for iOS status bar */
+    header {
+      padding-top: env(safe-area-inset-top, 0px);
+    }
   }
 }
 
