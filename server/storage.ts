@@ -113,6 +113,11 @@ export class MemStorage implements IStorage {
     const project: Project = { 
       id,
       name: insertProject.name,
+      lineVendor: insertProject.lineVendor || null,
+      scannerName: insertProject.scannerName || null,
+      tourId: insertProject.tourId || null,
+      scanDate: insertProject.scanDate || null,
+      groupIdType: insertProject.groupIdType || null,
       description: insertProject.description || null,
       createdAt: new Date() 
     };
