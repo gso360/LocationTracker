@@ -106,6 +106,7 @@ const AddLocation = () => {
   };
   
   const handleBarcodeScanned = (value: string) => {
+    // Skip if this barcode is already in the list
     if (!barcodes.includes(value)) {
       setBarcodes([...barcodes, value]);
     }
@@ -240,7 +241,11 @@ const AddLocation = () => {
   
   // Show barcode scanner if active
   if (showScanner) {
-    return <BarcodeScanner onScan={handleBarcodeScanned} onClose={() => setShowScanner(false)} />;
+    return <BarcodeScanner 
+      onScan={handleBarcodeScanned} 
+      onClose={() => setShowScanner(false)} 
+      existingBarcodes={barcodes} 
+    />;
   }
   
   return (
