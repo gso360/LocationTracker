@@ -48,11 +48,15 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
     }
   };
   
+  // iOS Safari works better with facingMode than deviceId
+  const isMobileIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  
   const videoConstraints = {
     width: 1280,
     height: 720,
     facingMode: "environment",
-    deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined
+    // Only use exact deviceId on non-iOS devices
+    ...(selectedDeviceId && !isMobileIOS ? { deviceId: { exact: selectedDeviceId } } : {})
   };
   
   const handleDeviceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -91,7 +95,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
               videoConstraints={videoConstraints}
             />
             
-            {devices.length > 1 && (
+            {devices.length > 1 && !isMobileIOS && (
               <div className="absolute top-4 right-4 bg-black bg-opacity-50 p-2 rounded">
                 <select 
                   value={selectedDeviceId}
