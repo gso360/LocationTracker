@@ -1,85 +1,57 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { QrCode } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+/**
+ * MobileQRCode component
+ * 
+ * Displays a QR code for quickly accessing the application on mobile devices
+ * Only visible on desktop screens
+ */
 export default function MobileQRCode() {
-  const [ipAddress, setIpAddress] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  
+  const [open, setOpen] = useState(false);
+  const [url, setUrl] = useState('');
+
   useEffect(() => {
-    // Get the hostname (which will be the Replit app URL)
-    const hostname = window.location.hostname;
-    const port = window.location.port;
+    // Get the current URL to generate QR code
+    const host = window.location.host;
     const protocol = window.location.protocol;
-    
-    let url: string;
-    
-    // Check if running on replit.com domain
-    if (hostname.includes('replit.app') || hostname.includes('repl.co')) {
-      url = `${protocol}//${hostname}`;
-    } else {
-      // For local development, include the port
-      url = `${protocol}//${hostname}${port ? ':' + port : ''}`;
-    }
-    
-    setIpAddress(url);
+    setUrl(`${protocol}//${host}`);
   }, []);
-  
-  const copyToClipboard = () => {
-    if (ipAddress) {
-      navigator.clipboard.writeText(ipAddress);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-  
-  if (!ipAddress) {
-    return null;
-  }
-  
-  // Generate QR code URL using a free QR code API
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(ipAddress)}`;
-  
+
   return (
-    <div className="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 z-50 max-w-xs">
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex items-center">
-          <QrCode className="h-5 w-5 text-gray-700 mr-2" />
-          <h3 className="font-medium text-gray-800">Test on Mobile</h3>
-        </div>
-        <button
-          onClick={() => document.getElementById('mobile-qr')?.remove()}
-          className="text-gray-400 hover:text-gray-600"
-        >
-          &times;
-        </button>
+    <>
+      <div 
+        className="bg-white rounded-full p-2 hover:bg-blue-50" 
+        onClick={() => setOpen(true)}
+        title="Scan to open on mobile"
+        aria-label="Open QR code for mobile access"
+      >
+        <QrCode size={32} className="text-primary" />
       </div>
-      
-      <div className="bg-gray-50 p-2 rounded flex justify-center mb-2">
-        <img 
-          src={qrCodeUrl} 
-          alt="QR Code for mobile testing" 
-          className="h-40 w-40"
-        />
-      </div>
-      
-      <div className="text-xs text-gray-600 mb-2 text-center">
-        Scan with your mobile device to test
-      </div>
-      
-      <div className="flex items-center">
-        <input
-          type="text"
-          readOnly
-          value={ipAddress}
-          className="text-xs p-1 border rounded flex-1 bg-gray-50"
-        />
-        <button
-          onClick={copyToClipboard}
-          className="ml-2 text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded"
-        >
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
-      </div>
-    </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Scan to open on mobile</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center py-4">
+            <div className="bg-white p-2 rounded-lg">
+              {url && (
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`} 
+                  alt="QR Code" 
+                  width={200} 
+                  height={200}
+                />
+              )}
+            </div>
+            <p className="text-sm text-center text-muted-foreground mt-4">
+              Scan this QR code with your mobile device to open the application
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

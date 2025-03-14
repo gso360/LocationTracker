@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512px" height="512px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <title>Showroom Manager Icon</title>
+    <g id="App-Icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Background" fill="#2962FF" x="0" y="0" width="512" height="512" rx="128"></rect>
+        <g id="Icon" transform="translate(101.000000, 91.000000)" fill="#FFFFFF">
+            <rect id="Rectangle" x="0" y="0" width="310" height="219" rx="21"></rect>
+            <circle id="Circle" fill="#2962FF" cx="155" cy="109" r="85"></circle>
+            <path d="M155,37 L224,144 L86,144 L155,37 Z" id="Triangle" fill="#FFFFFF"></path>
+            <rect id="Base" x="75" y="219" width="160" height="112" rx="11"></rect>
+            <rect id="Screen" fill="#2962FF" x="96" y="240" width="118" height="69" rx="5"></rect>
+            <rect id="Line-1" fill="#FFFFFF" x="112" y="261" width="86" height="5" rx="2.5"></rect>
+            <rect id="Line-2" fill="#FFFFFF" x="112" y="277" width="86" height="5" rx="2.5"></rect>
+            <rect id="Line-3" fill="#FFFFFF" x="112" y="293" width="64" height="5" rx="2.5"></rect>
+        </g>
+    </g>
+</svg>
