@@ -92,15 +92,20 @@ const NextLocationSelector = ({ locations, projectId, onBack }: NextLocationSele
         
         if (pdfData.success) {
           // Generate the PDF with the project data included
-          await generatePDFReport(pdfData.data, pdfData.projectData);
+          const filename = await generatePDFReport(pdfData.data, pdfData.projectData);
           
           toast({
             title: "Virtual Showroom Location ID Form Generated",
-            description: "Your location ID form has been downloaded. You can view it in your downloads folder.",
+            description: `Your location ID form '${filename}' has been downloaded to your downloads folder.`,
           });
         }
       } catch (pdfError) {
         console.error("PDF generation error:", pdfError);
+        toast({
+          title: "PDF Generation Warning",
+          description: "Your project was submitted successfully, but there was an issue creating the PDF report.",
+          variant: "default"
+        });
         // Don't fail the submission if PDF generation fails
       }
       
