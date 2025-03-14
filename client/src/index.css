@@ -11,3 +11,37 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+/* QR Code Component Styles */
+#mobile-qr {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: none;
+  cursor: pointer;
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.2));
+  transition: transform 0.2s ease-in-out;
+}
+
+@media (min-width: 768px) {
+  #mobile-qr {
+    display: block;
+  }
+}
+
+#mobile-qr:hover {
+  transform: scale(1.05);
+}
+
+/* Mobile-first styles */
+@media (max-width: 767px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+}

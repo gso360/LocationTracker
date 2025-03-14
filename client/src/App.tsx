@@ -9,6 +9,7 @@ import Reports from "./pages/Reports";
 import AddLocation from "./pages/AddLocation";
 import Projects from "./pages/Projects";
 import ProjectLocations from "./pages/ProjectLocations";
+import MobileQRCode from "./components/MobileQRCode";
 
 function Router() {
   return (
@@ -33,6 +34,9 @@ function App() {
         <Router />
       </AppLayout>
       <Toaster />
+      <div id="mobile-qr">
+        <MobileQRCode />
+      </div>
     </QueryClientProvider>
   );
 }
