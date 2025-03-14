@@ -43,9 +43,64 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc) {
-        onCapture(imageSrc);
+        // Optimize image before sending
+        compressImage(imageSrc, 0.7, 1280)
+          .then(compressedImage => {
+            onCapture(compressedImage);
+          })
+          .catch(err => {
+            console.error("Error compressing image:", err);
+            // Fallback to original image if compression fails
+            onCapture(imageSrc);
+          });
       }
     }
+  };
+  
+  // Function to compress image and reduce file size
+  const compressImage = (
+    imageSrc: string,
+    quality: number,
+    maxWidth: number
+  ): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        
+        // Calculate new dimensions while maintaining aspect ratio
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > maxWidth) {
+          const ratio = maxWidth / width;
+          width = maxWidth;
+          height = height * ratio;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+        
+        // Draw image to canvas with new dimensions
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Get compressed image data
+        const compressedImage = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedImage);
+      };
+      
+      img.onerror = () => {
+        reject(new Error('Error loading image'));
+      };
+      
+      img.src = imageSrc;
+    });
   };
   
   // iOS Safari works better with facingMode than deviceId
