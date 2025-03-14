@@ -174,6 +174,11 @@ export default function Projects() {
                       onClick={() => {
                         setSelectedProject(project);
                         setProjectName(project.name);
+                        setLineVendor(project.lineVendor || "");
+                        setScannerName(project.scannerName || "");
+                        setTourId(project.tourId || "");
+                        setScanDate(project.scanDate || "");
+                        setGroupIdType(project.groupIdType || "1-400");
                         setProjectDescription(project.description || "");
                         setIsCreateDialogOpen(true);
                       }}

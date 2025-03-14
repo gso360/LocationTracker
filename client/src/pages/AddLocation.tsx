@@ -25,6 +25,7 @@ const AddLocation = () => {
   
   const [locationName, setLocationName] = useState('');
   const [locationNotes, setLocationNotes] = useState('');
+  const [pinPlacement, setPinPlacement] = useState('');
   const [imageData, setImageData] = useState<string | null>(null);
   const [barcodes, setBarcodes] = useState<string[]>([]);
   const [showCamera, setShowCamera] = useState(false);
@@ -71,6 +72,7 @@ const AddLocation = () => {
     if (locationId && existingLocation) {
       setLocationName(existingLocation.name);
       setLocationNotes(existingLocation.notes || '');
+      setPinPlacement(existingLocation.pinPlacement || '');
       setImageData(existingLocation.imageData || null);
       setBarcodes(existingLocation.barcodes.map((b: Barcode) => b.value));
     }
@@ -132,6 +134,7 @@ const AddLocation = () => {
       const locationData: any = {
         name: locationName.trim(),
         notes: locationNotes.trim() || null,
+        pinPlacement: pinPlacement.trim() || null,
         imageData: imageData,
       };
       
@@ -260,6 +263,8 @@ const AddLocation = () => {
         setLocationName={setLocationName}
         locationNotes={locationNotes}
         setLocationNotes={setLocationNotes}
+        pinPlacement={pinPlacement}
+        setPinPlacement={setPinPlacement}
         imageData={imageData}
         handleCapturePhoto={handleCapturePhoto}
         barcodes={barcodes}
