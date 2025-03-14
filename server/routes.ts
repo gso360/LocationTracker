@@ -4,7 +4,8 @@ import { storage } from "./storage";
 import { 
   insertLocationSchema, 
   insertBarcodeSchema, 
-  insertReportSchema 
+  insertReportSchema,
+  insertProjectSchema
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";

@@ -3,8 +3,11 @@ import {
   barcodes, 
   reports, 
   users,
+  projects,
   type User, 
   type InsertUser,
+  type Project,
+  type InsertProject,
   type Location,
   type InsertLocation,
   type Barcode,
@@ -19,14 +22,22 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
 
+  // Project operations
+  getProject(id: number): Promise<Project | undefined>;
+  getProjects(): Promise<Project[]>;
+  createProject(project: InsertProject): Promise<Project>;
+  updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined>;
+  deleteProject(id: number): Promise<boolean>;
+
   // Location operations
   getLocation(id: number): Promise<Location | undefined>;
   getLocationByName(name: string): Promise<Location | undefined>;
   getLocations(): Promise<Location[]>;
+  getLocationsByProject(projectId: number): Promise<Location[]>;
   createLocation(location: InsertLocation): Promise<Location>;
   updateLocation(id: number, location: Partial<InsertLocation>): Promise<Location | undefined>;
   deleteLocation(id: number): Promise<boolean>;
-  getNextLocationNumber(): Promise<string>;
+  getNextLocationNumber(projectId?: number): Promise<string>;
 
   // Barcode operations
   getBarcode(id: number): Promise<Barcode | undefined>;
@@ -43,22 +54,26 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
+  private projects: Map<number, Project>;
   private locations: Map<number, Location>;
   private barcodes: Map<number, Barcode>;
   private reports: Map<number, Report>;
   
   private currentUserId: number;
+  private currentProjectId: number;
   private currentLocationId: number;
   private currentBarcodeId: number;
   private currentReportId: number;
 
   constructor() {
     this.users = new Map();
+    this.projects = new Map();
     this.locations = new Map();
     this.barcodes = new Map();
     this.reports = new Map();
     
     this.currentUserId = 1;
+    this.currentProjectId = 1;
     this.currentLocationId = 1;
     this.currentBarcodeId = 1;
     this.currentReportId = 1;
@@ -82,6 +97,59 @@ export class MemStorage implements IStorage {
     return user;
   }
 
+  // Project operations
+  async getProject(id: number): Promise<Project | undefined> {
+    return this.projects.get(id);
+  }
+
+  async getProjects(): Promise<Project[]> {
+    return Array.from(this.projects.values()).sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }
+
+  async createProject(insertProject: InsertProject): Promise<Project> {
+    const id = this.currentProjectId++;
+    const project: Project = { 
+      id,
+      name: insertProject.name,
+      description: insertProject.description || null,
+      createdAt: new Date() 
+    };
+    this.projects.set(id, project);
+    return project;
+  }
+
+  async updateProject(id: number, updateData: Partial<InsertProject>): Promise<Project | undefined> {
+    const project = this.projects.get(id);
+    if (!project) return undefined;
+
+    const updatedProject = { ...project, ...updateData };
+    this.projects.set(id, updatedProject);
+    return updatedProject;
+  }
+
+  async deleteProject(id: number): Promise<boolean> {
+    const deleted = this.projects.delete(id);
+    
+    // Also delete associated locations and their barcodes
+    if (deleted) {
+      const locationIdsToDelete: number[] = [];
+      
+      this.locations.forEach((location, locationId) => {
+        if (location.projectId === id) {
+          locationIdsToDelete.push(locationId);
+        }
+      });
+      
+      locationIdsToDelete.forEach(locationId => {
+        this.deleteLocation(locationId);
+      });
+    }
+    
+    return deleted;
+  }
+
   // Location operations
   async getLocation(id: number): Promise<Location | undefined> {
     return this.locations.get(id);
@@ -99,11 +167,22 @@ export class MemStorage implements IStorage {
     });
   }
 
+  async getLocationsByProject(projectId: number): Promise<Location[]> {
+    return Array.from(this.locations.values())
+      .filter(location => location.projectId === projectId)
+      .sort((a, b) => {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+  }
+
   async createLocation(insertLocation: InsertLocation): Promise<Location> {
     const id = this.currentLocationId++;
     const location: Location = { 
-      ...insertLocation, 
-      id, 
+      id,
+      name: insertLocation.name,
+      notes: insertLocation.notes || null,
+      imageData: insertLocation.imageData || null,
+      projectId: insertLocation.projectId || null,
       createdAt: new Date() 
     };
     this.locations.set(id, location);
@@ -140,8 +219,12 @@ export class MemStorage implements IStorage {
     return deleted;
   }
 
-  async getNextLocationNumber(): Promise<string> {
-    const existingLocations = await this.getLocations();
+  async getNextLocationNumber(projectId?: number): Promise<string> {
+    // Get locations filtered by project if projectId is provided
+    const existingLocations = projectId 
+      ? await this.getLocationsByProject(projectId)
+      : await this.getLocations();
+      
     let maxNumber = 0;
     
     // Find the highest location number
@@ -155,8 +238,8 @@ export class MemStorage implements IStorage {
       }
     });
     
-    // Format with leading zeros (e.g., 001, 002, etc.)
-    return (maxNumber + 1).toString().padStart(3, '0');
+    // Return simple sequential number without leading zeros
+    return (maxNumber + 1).toString();
   }
 
   // Barcode operations

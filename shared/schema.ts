@@ -16,11 +16,28 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
+// New table for projects/showrooms
+export const projects = pgTable("projects", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertProjectSchema = createInsertSchema(projects).pick({
+  name: true,
+  description: true,
+});
+
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type Project = typeof projects.$inferSelect;
+
 export const locations = pgTable("locations", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   notes: text("notes"),
   imageData: text("image_data"),
+  projectId: integer("project_id"), // Foreign key to projects table
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -28,6 +45,7 @@ export const insertLocationSchema = createInsertSchema(locations).pick({
   name: true,
   notes: true,
   imageData: true,
+  projectId: true,
 });
 
 export type InsertLocation = z.infer<typeof insertLocationSchema>;
