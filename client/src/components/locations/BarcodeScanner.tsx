@@ -57,7 +57,8 @@ const BarcodeScanForm = ({
 
   // Process a scanned or entered barcode
   const processBarcode = (barcode: string) => {
-    // Check if barcode already exists in our scanned list or existing barcodes
+    // Check if barcode already exists in our current scanning session
+    // or in the existing barcodes for this specific GroupID
     const isDuplicate = scannedCodes.includes(barcode) || existingBarcodes.includes(barcode);
     
     if (isDuplicate) {
@@ -146,7 +147,7 @@ const BarcodeScanForm = ({
               <div className="mt-2 bg-yellow-50 border border-yellow-200 rounded p-2 text-sm text-yellow-800 flex items-start">
                 <div className="flex-shrink-0 mr-2 mt-0.5">⚠️</div>
                 <div>
-                  Duplicate barcode skipped: <span className="font-medium">{lastDuplicate}</span>
+                  Duplicate for this GroupID: <span className="font-medium">{lastDuplicate}</span>
                 </div>
               </div>
             )}
@@ -226,9 +227,9 @@ const ManualBarcodeEntry = ({
       return;
     }
     
-    // Check for duplicates
+    // Check for duplicates within this specific GroupID
     if (existingBarcodes.includes(value.trim())) {
-      setError("This barcode has already been scanned.");
+      setError("This barcode has already been added to this GroupID.");
       return;
     }
     
