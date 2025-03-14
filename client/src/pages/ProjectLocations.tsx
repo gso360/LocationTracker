@@ -72,6 +72,17 @@ export default function ProjectLocations() {
     );
   }
 
+  // If we should show the location selector
+  if (showLocationSelector && locations.length > 0) {
+    return (
+      <NextLocationSelector 
+        locations={locations} 
+        projectId={projectId} 
+        onBack={() => setShowLocationSelector(false)} 
+      />
+    );
+  }
+
   return (
     <div className="container mx-auto py-4">
       <div className="flex items-center mb-4">
@@ -88,10 +99,21 @@ export default function ProjectLocations() {
 
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">GroupIDs</h2>
-        <Button onClick={() => setLocation(`/projects/${projectId}/add-location`)}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add New GroupID
-        </Button>
+        <div className="space-x-2">
+          {locations.length > 0 && (
+            <Button 
+              variant="outline" 
+              onClick={() => setShowLocationSelector(true)}
+              className="border-[#2962FF] text-[#2962FF]"
+            >
+              Select Next GroupID
+            </Button>
+          )}
+          <Button onClick={() => setLocation(`/projects/${projectId}/add-location`)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add New GroupID
+          </Button>
+        </div>
       </div>
 
       {isLocationsLoading ? (

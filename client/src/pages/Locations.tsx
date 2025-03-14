@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Filter, Plus } from "lucide-react";
+import { Filter, Plus, MapPin } from "lucide-react";
 import LocationList from "@/components/locations/LocationList";
 import { useToast } from "@/hooks/use-toast";
 import { useLocations } from "@/hooks/useLocations";
+import NextLocationSelector from "@/components/locations/NextLocationSelector";
 
 const Locations = () => {
   const [, navigate] = useLocation();
   const { data: locations, isLoading, error } = useLocations();
   const { toast } = useToast();
+  const [showLocationSelector, setShowLocationSelector] = useState(false);
   
   const handleAddLocation = () => {
     navigate("/add-location");
@@ -24,11 +26,30 @@ const Locations = () => {
     });
   }
   
+  // Show selector if toggled and locations exist
+  if (showLocationSelector && locations && locations.length > 0) {
+    return (
+      <NextLocationSelector 
+        locations={locations} 
+        onBack={() => setShowLocationSelector(false)} 
+      />
+    );
+  }
+
+  // Main locations view
   return (
     <div className="p-4">
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-lg font-medium text-[#455A64]">Your Locations</h2>
-        <div>
+        <div className="flex items-center">
+          {!showEmptyState && (
+            <button 
+              className="mr-2 px-3 py-2 border border-[#2962FF] text-[#2962FF] rounded-full text-sm font-medium"
+              onClick={() => setShowLocationSelector(true)}
+            >
+              Select Next GroupID
+            </button>
+          )}
           <button className="p-2 mr-2 rounded-full hover:bg-gray-100">
             <Filter className="h-5 w-5 text-[#455A64]" />
           </button>
@@ -70,5 +91,4 @@ const Locations = () => {
 
 export default Locations;
 
-// Import the MapPin icon at the top of the file
-import { MapPin } from "lucide-react";
+

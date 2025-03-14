@@ -9,20 +9,20 @@ interface NextLocationSelectorProps {
 }
 
 const NextLocationSelector = ({ locations, projectId, onBack }: NextLocationSelectorProps) => {
-  const [, setLocation] = useLocation();
+  const [, navigate] = useLocation();
 
   // Handle add next location button click
   const handleAddNextLocation = () => {
     if (projectId) {
-      setLocation(`/projects/${projectId}/add-location`);
+      navigate(`/projects/${projectId}/add-location`);
     } else {
-      setLocation('/add-location');
+      navigate('/add-location');
     }
   };
 
   // Handle navigation to an existing location
   const handleLocationClick = (locationId: number) => {
-    setLocation(`/edit-location/${locationId}`);
+    navigate(`/edit-location/${locationId}`);
   };
 
   return (
