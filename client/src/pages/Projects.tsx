@@ -209,7 +209,7 @@ export default function Projects() {
                   className="w-full"
                   onClick={() => setLocation(`/projects/${project.id}`)}
                 >
-                  View Locations
+                  Create GroupIDs
                 </Button>
               </CardContent>
             </Card>
