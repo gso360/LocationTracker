@@ -26,6 +26,11 @@ export default function Projects() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [projectName, setProjectName] = useState("");
+  const [lineVendor, setLineVendor] = useState("");
+  const [scannerName, setScannerName] = useState("");
+  const [tourId, setTourId] = useState("");
+  const [scanDate, setScanDate] = useState("");
+  const [groupIdType, setGroupIdType] = useState("1-400");
   const [projectDescription, setProjectDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,7 +49,16 @@ export default function Projects() {
     if (!projectName.trim()) {
       toast({
         title: "Error",
-        description: "Project name is required",
+        description: "Showroom name is required",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!scannerName.trim()) {
+      toast({
+        title: "Error",
+        description: "Scanner's name is required",
         variant: "destructive"
       });
       return;
@@ -54,6 +68,11 @@ export default function Projects() {
     try {
       await apiRequest('POST', '/api/projects', {
         name: projectName,
+        lineVendor: lineVendor || null,
+        scannerName: scannerName || null,
+        tourId: tourId || null,
+        scanDate: scanDate || null,
+        groupIdType: groupIdType || null,
         description: projectDescription || null
       });
 
@@ -64,6 +83,11 @@ export default function Projects() {
 
       // Reset form and close dialog
       setProjectName("");
+      setLineVendor("");
+      setScannerName("");
+      setTourId("");
+      setScanDate("");
+      setGroupIdType("1-400");
       setProjectDescription("");
       setIsCreateDialogOpen(false);
       
@@ -202,23 +226,79 @@ export default function Projects() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
+            {/* Project Creation Form */}
             <div>
-              <Label htmlFor="project-name">Project Name</Label>
+              <Label htmlFor="project-name">Showroom Name</Label>
               <Input 
                 id="project-name"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
-                placeholder="Enter project name"
+                placeholder="Enter showroom name"
               />
             </div>
+            
             <div>
-              <Label htmlFor="project-description">Description (Optional)</Label>
+              <Label htmlFor="line-vendor">Line/Vendor</Label>
+              <Input 
+                id="line-vendor"
+                value={lineVendor}
+                onChange={(e) => setLineVendor(e.target.value)}
+                placeholder="Enter line or vendor name"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="scanner-name">Scanner's Name (First and Last)</Label>
+              <Input 
+                id="scanner-name"
+                value={scannerName}
+                onChange={(e) => setScannerName(e.target.value)}
+                placeholder="Enter your full name"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="tour-id">Tour ID (Market, Season, Year)</Label>
+              <Input 
+                id="tour-id"
+                value={tourId}
+                onChange={(e) => setTourId(e.target.value)}
+                placeholder="e.g., Fall 2025"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="scan-date">Date</Label>
+              <Input 
+                id="scan-date"
+                type="date"
+                value={scanDate}
+                onChange={(e) => setScanDate(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="group-id-type">GroupID Type</Label>
+              <select
+                id="group-id-type"
+                value={groupIdType}
+                onChange={(e) => setGroupIdType(e.target.value)}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <option value="1-400">1-400</option>
+                <option value="S1-X">S1-X</option>
+                <option value="Custom">Custom</option>
+              </select>
+            </div>
+            
+            <div>
+              <Label htmlFor="project-description">Additional Notes (Optional)</Label>
               <Textarea 
                 id="project-description"
                 value={projectDescription}
                 onChange={(e) => setProjectDescription(e.target.value)}
-                placeholder="Enter project description"
-                rows={3}
+                placeholder="Enter any additional notes"
+                rows={2}
               />
             </div>
           </div>
@@ -239,8 +319,21 @@ export default function Projects() {
                   // Update existing project
                   setIsSubmitting(true);
                   try {
+                    if (!projectName.trim()) {
+                      throw new Error("Showroom name is required");
+                    }
+                    
+                    if (!scannerName.trim()) {
+                      throw new Error("Scanner's name is required");
+                    }
+                    
                     await apiRequest('PATCH', `/api/projects/${selectedProject.id}`, {
                       name: projectName,
+                      lineVendor: lineVendor || null,
+                      scannerName: scannerName || null,
+                      tourId: tourId || null,
+                      scanDate: scanDate || null,
+                      groupIdType: groupIdType || null,
                       description: projectDescription || null
                     });
 
@@ -252,12 +345,22 @@ export default function Projects() {
                     setIsCreateDialogOpen(false);
                     setSelectedProject(null);
                     
+                    // Reset form fields
+                    setProjectName("");
+                    setLineVendor("");
+                    setScannerName("");
+                    setTourId("");
+                    setScanDate("");
+                    setGroupIdType("1-400");
+                    setProjectDescription("");
+                    
                     // Refresh projects list
                     queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
                   } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : "Failed to update project";
                     toast({
                       title: "Error",
-                      description: "Failed to update project",
+                      description: errorMessage,
                       variant: "destructive"
                     });
                   } finally {
