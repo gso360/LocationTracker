@@ -36,7 +36,7 @@ const Header = () => {
         </Link>
         <Link href="/locations">
           <div className={`px-4 py-2 font-medium ${isLocationsPage ? 'text-[#2962FF] border-b-2 border-[#2962FF]' : 'text-gray-500'}`}>
-            Locations
+            GroupIDs
           </div>
         </Link>
         <Link href="/reports">
