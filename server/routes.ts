@@ -25,6 +25,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
+  // Projects endpoints
+  
+  // Get all projects
+  router.get("/projects", async (req: Request, res: Response) => {
+    try {
+      const projects = await storage.getProjects();
+      res.json(projects);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve projects" });
+    }
+  });
+
+  // Get a single project
+  router.get("/projects/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const project = await storage.getProject(id);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      res.json(project);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve project" });
+    }
+  });
+
+  // Create a new project
+  router.post("/projects", async (req: Request, res: Response) => {
+    const { data, error } = validateRequest(insertProjectSchema, req.body);
+    
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+    
+    try {
+      const newProject = await storage.createProject(data);
+      res.status(201).json(newProject);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create project" });
+    }
+  });
+
+  // Update a project
+  router.patch("/projects/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const project = await storage.getProject(id);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Validate only the fields that are present in the request
+      const updateData: any = {};
+      
+      if (req.body.name !== undefined) updateData.name = req.body.name;
+      if (req.body.description !== undefined) updateData.description = req.body.description;
+      
+      const updatedProject = await storage.updateProject(id, updateData);
+      res.json(updatedProject);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update project" });
+    }
+  });
+
+  // Delete a project
+  router.delete("/projects/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const success = await storage.deleteProject(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete project" });
+    }
+  });
+
+  // Get all locations for a specific project
+  router.get("/projects/:id/locations", async (req: Request, res: Response) => {
+    try {
+      const projectId = parseInt(req.params.id, 10);
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      const locations = await storage.getLocationsByProject(projectId);
+      
+      // For each location, get associated barcodes
+      const locationsWithBarcodes = await Promise.all(
+        locations.map(async (location) => {
+          const barcodes = await storage.getBarcodesByLocation(location.id);
+          return {
+            ...location,
+            barcodes
+          };
+        })
+      );
+      
+      res.json(locationsWithBarcodes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to retrieve locations for project" });
+    }
+  });
+
+  // Get next available location number for a specific project
+  router.get("/projects/:id/next-location-number", async (req: Request, res: Response) => {
+    try {
+      const projectId = parseInt(req.params.id, 10);
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      const nextNumber = await storage.getNextLocationNumber(projectId);
+      res.json({ nextNumber });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate next location number" });
+    }
+  });
+
   // Locations endpoints
   
   // Get all locations
@@ -237,8 +366,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate Excel/CSV report with barcodes and locations
   router.get("/exports/excel", async (req: Request, res: Response) => {
     try {
-      // This endpoint will return data for excel report generation on the client
-      const locations = await storage.getLocations();
+      // Check if a project ID is provided as a query parameter
+      const projectId = req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined;
+      
+      let locations;
+      if (projectId) {
+        // Get locations for a specific project
+        const project = await storage.getProject(projectId);
+        if (!project) {
+          return res.status(404).json({ 
+            success: false,
+            message: "Project not found" 
+          });
+        }
+        locations = await storage.getLocationsByProject(projectId);
+      } else {
+        // Get all locations
+        locations = await storage.getLocations();
+      }
+
+      // Add barcodes to each location
       const locationsWithBarcodes = await Promise.all(
         locations.map(async (location) => {
           const barcodes = await storage.getBarcodesByLocation(location.id);
@@ -264,8 +411,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate PDF report with location photos
   router.get("/exports/pdf", async (req: Request, res: Response) => {
     try {
-      // This endpoint will return data for PDF report generation on the client
-      const locations = await storage.getLocations();
+      // Check if a project ID is provided as a query parameter
+      const projectId = req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined;
+      
+      let locations;
+      if (projectId) {
+        // Get locations for a specific project
+        const project = await storage.getProject(projectId);
+        if (!project) {
+          return res.status(404).json({ 
+            success: false,
+            message: "Project not found" 
+          });
+        }
+        locations = await storage.getLocationsByProject(projectId);
+      } else {
+        // Get all locations
+        locations = await storage.getLocations();
+      }
       
       res.json({
         success: true,
