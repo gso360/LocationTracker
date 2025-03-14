@@ -71,7 +71,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
         
         <div className="mb-4">
           <label htmlFor="pinPlacement" className="block text-sm font-medium text-gray-700 mb-1">
-            Where to place pin
+            Where to place pin (Optional)
           </label>
           <input 
             type="text" 
@@ -81,6 +81,9 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
             className="py-2 px-3 block w-full border border-gray-300 rounded-md focus:ring-[#2962FF] focus:border-[#2962FF]" 
             placeholder="Enter pin placement description"
           />
+          <p className="text-xs text-gray-500 mt-1">
+            The photo can be used to understand location context if no pin placement is specified.
+          </p>
         </div>
       </div>
       

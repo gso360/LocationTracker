@@ -1,0 +1,16 @@
+{
+  "name": "Showroom Manager",
+  "short_name": "Showroom",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2962FF",
+  "description": "Mobile inventory management for showrooms",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
