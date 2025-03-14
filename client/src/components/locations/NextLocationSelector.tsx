@@ -15,17 +15,19 @@ const NextLocationSelector = ({ locations, projectId, onBack }: NextLocationSele
   const handleAddNextLocation = () => {
     console.log("Adding next location, projectId:", projectId);
     
+    // Force navigation by changing window location
     if (projectId) {
-      // This path matches the route in App.tsx
-      navigate(`/projects/${projectId}/add-location`);
+      // Direct DOM navigation as a fallback when wouter navigation isn't working
+      window.location.href = `/projects/${projectId}/add-location`;
     } else {
-      navigate('/add-location');
+      window.location.href = '/add-location';
     }
   };
 
   // Handle navigation to an existing location
   const handleLocationClick = (locationId: number) => {
-    navigate(`/edit-location/${locationId}`);
+    // Direct DOM navigation for consistency with the Add Next GroupID button
+    window.location.href = `/edit-location/${locationId}`;
   };
 
   return (
