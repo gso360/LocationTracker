@@ -5,6 +5,8 @@ interface AddLocationFormProps {
   setLocationName: (name: string) => void;
   locationNotes: string;
   setLocationNotes: (notes: string) => void;
+  pinPlacement: string;
+  setPinPlacement: (pinPlacement: string) => void;
   imageData: string | null;
   handleCapturePhoto: () => void;
   barcodes: string[];
@@ -19,6 +21,8 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
   setLocationName,
   locationNotes,
   setLocationNotes,
+  pinPlacement,
+  setPinPlacement,
   imageData,
   handleCapturePhoto,
   barcodes,
@@ -33,7 +37,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
       <div className="bg-white rounded-lg shadow p-4 mb-6">
         <div className="mb-4">
           <label htmlFor="locationName" className="block text-sm font-medium text-gray-700 mb-1">
-            Location Name
+            GroupID Number
           </label>
           <div className="flex rounded-md overflow-hidden border border-gray-300">
             <span className="bg-gray-100 px-3 py-2 text-gray-500 flex items-center border-r">#</span>
@@ -47,7 +51,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
             />
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            Location will be assigned the next sequential number automatically.
+            The GroupID will be assigned the next sequential number automatically.
           </p>
         </div>
         
@@ -63,6 +67,20 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
             className="py-2 px-3 block w-full border border-gray-300 rounded-md focus:ring-[#2962FF] focus:border-[#2962FF]" 
             placeholder="Add any details about this location"
           ></textarea>
+        </div>
+        
+        <div className="mb-4">
+          <label htmlFor="pinPlacement" className="block text-sm font-medium text-gray-700 mb-1">
+            Where to place pin
+          </label>
+          <input 
+            type="text" 
+            id="pinPlacement" 
+            value={pinPlacement}
+            onChange={(e) => setPinPlacement(e.target.value)}
+            className="py-2 px-3 block w-full border border-gray-300 rounded-md focus:ring-[#2962FF] focus:border-[#2962FF]" 
+            placeholder="Enter pin placement description"
+          />
         </div>
       </div>
       
@@ -115,9 +133,9 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
       {/* Barcode Scanner Section */}
       <div className="bg-white rounded-lg shadow mb-6">
         <div className="p-4 border-b">
-          <h3 className="font-medium">Scan Barcodes</h3>
+          <h3 className="font-medium">Scan Product Barcodes</h3>
           <p className="text-sm text-gray-500">
-            Scan one or more barcodes to associate with this location.
+            Scan one or more product barcodes to associate with this GroupID location.
           </p>
         </div>
         
@@ -142,7 +160,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
           ) : (
             <div className="text-center py-6 text-gray-500">
               <QrCode className="h-8 w-8 mx-auto mb-2" />
-              <p>No barcodes scanned yet</p>
+              <p>No product barcodes scanned yet</p>
             </div>
           )}
         </div>
@@ -153,7 +171,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
             className="bg-[#2962FF] text-white px-4 py-2 rounded-lg w-full flex items-center justify-center"
           >
             <QrCode className="h-4 w-4 mr-1" />
-            Scan Barcode
+            Scan Product Barcode
           </button>
         </div>
       </div>
@@ -171,7 +189,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
               Saving...
             </>
           ) : (
-            'Save Location'
+            'Save GroupID'
           )}
         </button>
       </div>
