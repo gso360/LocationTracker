@@ -65,7 +65,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
             value={locationNotes}
             onChange={(e) => setLocationNotes(e.target.value)}
             className="py-2 px-3 block w-full border border-gray-300 rounded-md focus:ring-[#2962FF] focus:border-[#2962FF]" 
-            placeholder="Add any details about this location"
+            placeholder="Add any details about this GroupID"
           ></textarea>
         </div>
         
@@ -82,7 +82,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
             placeholder="Enter pin placement description"
           />
           <p className="text-xs text-gray-500 mt-1">
-            The photo can be used to understand location context if no pin placement is specified.
+            The photo can be used to understand GroupID context if no pin placement is specified.
           </p>
         </div>
       </div>

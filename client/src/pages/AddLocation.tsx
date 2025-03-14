@@ -199,10 +199,10 @@ const AddLocation = () => {
       }
       
       toast({
-        title: locationId ? "Location updated" : "Location created",
+        title: locationId ? "GroupID updated" : "GroupID created",
         description: locationId 
-          ? "The location has been updated successfully." 
-          : "The new location has been added successfully.",
+          ? "The GroupID has been updated successfully." 
+          : "The new GroupID has been added successfully.",
       });
       
       // Navigate back to the appropriate page
@@ -215,8 +215,8 @@ const AddLocation = () => {
       toast({
         title: "Error",
         description: locationId 
-          ? "Failed to update the location. Please try again." 
-          : "Failed to create the location. Please try again.",
+          ? "Failed to update the GroupID. Please try again." 
+          : "Failed to create the GroupID. Please try again.",
         variant: "destructive",
       });
     } finally {
