@@ -12,6 +12,7 @@ import type { Location, Barcode } from "@shared/schema";
 
 interface LocationParams {
   id?: string;
+  projectId?: string;
 }
 
 const AddLocation = () => {
@@ -20,6 +21,7 @@ const AddLocation = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const locationId = params.id ? parseInt(params.id, 10) : undefined;
+  const projectId = params.projectId ? parseInt(params.projectId, 10) : undefined;
   
   const [locationName, setLocationName] = useState('');
   const [locationNotes, setLocationNotes] = useState('');
@@ -31,15 +33,33 @@ const AddLocation = () => {
   
   // Fetch the next location number if we're adding a new location
   const { data: nextNumberData } = useQuery({
-    queryKey: ['/api/locations/next-number'],
+    queryKey: ['/api/projects', projectId, 'next-location-number'],
+    queryFn: async () => {
+      if (projectId) {
+        const response = await apiRequest('GET', `/api/projects/${projectId}/next-location-number`);
+        return await response.json();
+      } else {
+        const response = await apiRequest('GET', '/api/locations/next-number');
+        return await response.json();
+      }
+    },
     enabled: !locationId,
   });
   
   // If editing, fetch the existing location data
-  const { data: existingLocation, isLoading: isLoadingLocation } = useQuery({
-    queryKey: [`/api/locations/${locationId}`],
+  const { data: existingLocationData, isLoading: isLoadingLocation } = useQuery({
+    queryKey: ['/api/locations', locationId],
+    queryFn: async () => {
+      if (locationId) {
+        const response = await apiRequest('GET', `/api/locations/${locationId}`);
+        return await response.json();
+      }
+      return null;
+    },
     enabled: !!locationId,
   });
+  
+  const existingLocation = existingLocationData || null;
   
   useEffect(() => {
     // If we got the next number, set it as the location name
@@ -62,7 +82,11 @@ const AddLocation = () => {
     } else if (showScanner) {
       setShowScanner(false);
     } else {
-      navigate("/");
+      if (projectId) {
+        navigate(`/projects/${projectId}`);
+      } else {
+        navigate("/");
+      }
     }
   };
   
@@ -105,23 +129,28 @@ const AddLocation = () => {
     
     try {
       // Create or update the location
-      const locationData = {
+      const locationData: any = {
         name: locationName.trim(),
-        notes: locationNotes.trim(),
+        notes: locationNotes.trim() || null,
         imageData: imageData,
       };
       
-      let locationResponse;
+      // Add project ID to new locations if specified
+      if (projectId && !locationId) {
+        locationData.projectId = projectId;
+      }
+      
+      let savedLocation;
       
       if (locationId) {
         // Update existing location
-        locationResponse = await apiRequest("PATCH", `/api/locations/${locationId}`, locationData);
+        const response = await apiRequest("PATCH", `/api/locations/${locationId}`, locationData);
+        savedLocation = await response.json();
       } else {
         // Create new location
-        locationResponse = await apiRequest("POST", "/api/locations", locationData);
+        const response = await apiRequest("POST", "/api/locations", locationData);
+        savedLocation = await response.json();
       }
-      
-      const savedLocation = await locationResponse.json();
       
       // If we're creating a new location, also save the barcodes
       if (!locationId) {
@@ -159,8 +188,12 @@ const AddLocation = () => {
         );
       }
       
-      // Refresh the locations list
+      // Refresh the relevant query caches
       queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
+      
+      if (projectId) {
+        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'locations'] });
+      }
       
       toast({
         title: locationId ? "Location updated" : "Location created",
@@ -169,7 +202,12 @@ const AddLocation = () => {
           : "The new location has been added successfully.",
       });
       
-      navigate("/");
+      // Navigate back to the appropriate page
+      if (projectId) {
+        navigate(`/projects/${projectId}`);
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       toast({
         title: "Error",

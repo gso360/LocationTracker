@@ -7,14 +7,20 @@ import AppLayout from "./components/AppLayout";
 import Locations from "./pages/Locations";
 import Reports from "./pages/Reports";
 import AddLocation from "./pages/AddLocation";
+import Projects from "./pages/Projects";
+import ProjectLocations from "./pages/ProjectLocations";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Locations} />
+      <Route path="/" component={Projects} />
+      <Route path="/locations" component={Locations} />
       <Route path="/reports" component={Reports} />
       <Route path="/add-location" component={AddLocation} />
       <Route path="/edit-location/:id" component={AddLocation} />
+      <Route path="/projects" component={Projects} />
+      <Route path="/projects/:id" component={ProjectLocations} />
+      <Route path="/projects/:projectId/add-location" component={AddLocation} />
       <Route component={NotFound} />
     </Switch>
   );
