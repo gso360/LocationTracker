@@ -7,6 +7,7 @@ import { apiRequest } from "@/lib/queryClient";
 import CameraCapture from "@/components/locations/CameraCapture";
 import BarcodeScanner from "@/components/locations/BarcodeScanner";
 import AddLocationForm from "@/components/locations/AddLocationForm";
+import NextLocationSelector from "@/components/locations/NextLocationSelector";
 import { useQuery } from "@tanstack/react-query";
 import type { Location, Barcode } from "@shared/schema";
 
@@ -30,7 +31,23 @@ const AddLocation = () => {
   const [barcodes, setBarcodes] = useState<string[]>([]);
   const [showCamera, setShowCamera] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const [showLocationSelector, setShowLocationSelector] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [savedLocation, setSavedLocation] = useState<any>(null);
+  
+  // Fetch all locations for the GroupID selector
+  const { data: allLocations = [] } = useQuery({
+    queryKey: projectId ? ['/api/projects', projectId, 'locations'] : ['/api/locations'],
+    queryFn: async () => {
+      if (projectId) {
+        const response = await apiRequest('GET', `/api/projects/${projectId}/locations`);
+        return await response.json();
+      } else {
+        const response = await apiRequest('GET', '/api/locations');
+        return await response.json();
+      }
+    }
+  });
   
   // Fetch the next location number if we're adding a new location
   const { data: nextNumberData } = useQuery({
@@ -119,18 +136,18 @@ const AddLocation = () => {
   };
   
   const handleSaveLocation = async () => {
-    if (!locationName.trim()) {
-      toast({
-        title: "Error",
-        description: "GroupID name is required.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
-    try {
+    return new Promise<any>((resolve, reject) => {
+      if (!locationName.trim()) {
+        toast({
+          title: "Error",
+          description: "GroupID name is required.",
+          variant: "destructive",
+        });
+        return reject("GroupID name is required");
+      }
+      
+      setIsSubmitting(true);
+      
       // Create or update the location
       const locationData: any = {
         name: locationName.trim(),
@@ -144,85 +161,92 @@ const AddLocation = () => {
         locationData.projectId = projectId;
       }
       
-      let savedLocation;
+      const saveAsync = async () => {
+        try {
+          let savedLocationData;
+          
+          if (locationId) {
+            // Update existing location
+            const response = await apiRequest("PATCH", `/api/locations/${locationId}`, locationData);
+            savedLocationData = await response.json();
+          } else {
+            // Create new location
+            const response = await apiRequest("POST", "/api/locations", locationData);
+            savedLocationData = await response.json();
+          }
+          
+          // If we're creating a new location, also save the barcodes
+          if (!locationId) {
+            // Save barcodes
+            await Promise.all(
+              barcodes.map(value => 
+                apiRequest("POST", "/api/barcodes", {
+                  value,
+                  locationId: savedLocationData.id,
+                })
+              )
+            );
+          } else {
+            // If editing, first get existing barcodes
+            const existingBarcodesResponse = await apiRequest("GET", `/api/locations/${locationId}/barcodes`);
+            const existingBarcodesData = await existingBarcodesResponse.json();
+            
+            // Delete barcodes that are no longer in the list
+            await Promise.all(
+              existingBarcodesData
+                .filter((b: Barcode) => !barcodes.includes(b.value))
+                .map((b: Barcode) => apiRequest("DELETE", `/api/barcodes/${b.id}`))
+            );
+            
+            // Add new barcodes
+            await Promise.all(
+              barcodes
+                .filter(value => !existingBarcodesData.some((b: Barcode) => b.value === value))
+                .map(value => 
+                  apiRequest("POST", "/api/barcodes", {
+                    value,
+                    locationId: savedLocationData.id,
+                  })
+                )
+            );
+          }
+          
+          // Refresh the relevant query caches
+          queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
+          
+          if (projectId) {
+            queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'locations'] });
+          }
+          
+          toast({
+            title: locationId ? "GroupID updated" : "GroupID created",
+            description: locationId 
+              ? "The GroupID has been updated successfully." 
+              : "The new GroupID has been added successfully.",
+          });
+          
+          // Save the location data for reference
+          setSavedLocation(savedLocationData);
+          
+          // Resolve the promise with the saved location
+          resolve(savedLocationData);
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: locationId 
+              ? "Failed to update the GroupID. Please try again." 
+              : "Failed to create the GroupID. Please try again.",
+            variant: "destructive",
+          });
+          reject(error);
+        } finally {
+          setIsSubmitting(false);
+        }
+      };
       
-      if (locationId) {
-        // Update existing location
-        const response = await apiRequest("PATCH", `/api/locations/${locationId}`, locationData);
-        savedLocation = await response.json();
-      } else {
-        // Create new location
-        const response = await apiRequest("POST", "/api/locations", locationData);
-        savedLocation = await response.json();
-      }
-      
-      // If we're creating a new location, also save the barcodes
-      if (!locationId) {
-        // Save barcodes
-        await Promise.all(
-          barcodes.map(value => 
-            apiRequest("POST", "/api/barcodes", {
-              value,
-              locationId: savedLocation.id,
-            })
-          )
-        );
-      } else {
-        // If editing, first get existing barcodes
-        const existingBarcodesResponse = await apiRequest("GET", `/api/locations/${locationId}/barcodes`);
-        const existingBarcodesData = await existingBarcodesResponse.json();
-        
-        // Delete barcodes that are no longer in the list
-        await Promise.all(
-          existingBarcodesData
-            .filter((b: Barcode) => !barcodes.includes(b.value))
-            .map((b: Barcode) => apiRequest("DELETE", `/api/barcodes/${b.id}`))
-        );
-        
-        // Add new barcodes
-        await Promise.all(
-          barcodes
-            .filter(value => !existingBarcodesData.some((b: Barcode) => b.value === value))
-            .map(value => 
-              apiRequest("POST", "/api/barcodes", {
-                value,
-                locationId: savedLocation.id,
-              })
-            )
-        );
-      }
-      
-      // Refresh the relevant query caches
-      queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
-      
-      if (projectId) {
-        queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'locations'] });
-      }
-      
-      toast({
-        title: locationId ? "GroupID updated" : "GroupID created",
-        description: locationId 
-          ? "The GroupID has been updated successfully." 
-          : "The new GroupID has been added successfully.",
-      });
-      
-      // Navigate back to the appropriate page
-      if (projectId) {
-        navigate(`/projects/${projectId}`);
-      } else {
-        navigate("/");
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: locationId 
-          ? "Failed to update the GroupID. Please try again." 
-          : "Failed to create the GroupID. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+      // Start the async operation
+      saveAsync();
+    });
   };
   
   // Show loading state while fetching existing location data
@@ -243,8 +267,55 @@ const AddLocation = () => {
   if (showScanner) {
     return <BarcodeScanner 
       onScan={handleBarcodeScanned} 
-      onClose={() => setShowScanner(false)} 
+      onClose={() => {
+        setShowScanner(false);
+        
+        // Only proceed with save if we have barcodes and a location name
+        if (barcodes.length > 0 && locationName.trim()) {
+          // After finishing barcode scanning, auto save the location data
+          handleSaveLocation()
+            .then((savedData) => {
+              // After saving, show the location selector so user can choose what to do next
+              queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
+              if (projectId) {
+                queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'locations'] });
+              }
+              setShowLocationSelector(true);
+            })
+            .catch((error) => {
+              // If there's an error, navigate back to list
+              if (projectId) {
+                navigate(`/projects/${projectId}`);
+              } else {
+                navigate("/");
+              }
+            });
+        } else {
+          // If we don't have barcodes, just go back to the previous screen
+          if (projectId) {
+            navigate(`/projects/${projectId}`);
+          } else {
+            navigate("/");
+          }
+        }
+      }} 
       existingBarcodes={barcodes} 
+    />;
+  }
+  
+  // Show location selector if active
+  if (showLocationSelector) {
+    return <NextLocationSelector 
+      locations={allLocations} 
+      projectId={projectId}
+      onBack={() => {
+        setShowLocationSelector(false);
+        if (projectId) {
+          navigate(`/projects/${projectId}`);
+        } else {
+          navigate("/");
+        }
+      }} 
     />;
   }
   
