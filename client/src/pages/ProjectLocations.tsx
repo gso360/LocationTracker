@@ -7,12 +7,14 @@ import { useQuery } from "@tanstack/react-query";
 import { PlusCircle, ArrowLeft } from "lucide-react";
 import { type Project, type Location, type Barcode } from "@shared/schema";
 import LocationList from "@/components/locations/LocationList";
+import NextLocationSelector from "@/components/locations/NextLocationSelector";
 
 export default function ProjectLocations() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const params = useParams<{ id: string }>();
   const projectId = params.id ? parseInt(params.id, 10) : undefined;
+  const [showLocationSelector, setShowLocationSelector] = useState(false);
 
   const { data: projectData, isLoading: isProjectLoading } = useQuery({
     queryKey: ['/api/projects', projectId],

@@ -338,7 +338,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existi
     return () => {
       stopListening();
     };
-  }, [showBarcodeInput, startListening, stopListening]);
+  }, [showBarcodeInput, startListening, stopListening, handleBarcodeEntry]);
   
   return (
     <div className="h-full flex flex-col">
