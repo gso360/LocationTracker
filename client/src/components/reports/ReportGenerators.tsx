@@ -46,26 +46,34 @@ const ReportGenerators = () => {
     }
   };
   
-  const handleGeneratePDFReport = async () => {
+  // Define a function to handle PDF generation for a specific project ID
+  const generateProjectPDF = async (projectId?: number) => {
     setIsGeneratingPDF(true);
     try {
-      const response = await apiRequest("GET", "/api/exports/pdf");
+      // Add projectId parameter to get locations for a specific project
+      const url = projectId ? `/api/exports/pdf?projectId=${projectId}` : '/api/exports/pdf';
+      const response = await apiRequest("GET", url);
       const data = await response.json();
       
       if (data.success) {
-        const filename = await generatePDFReport(data.data);
+        // Pass both location data and project data to the PDF generator
+        const filename = await generatePDFReport(data.data, data.projectData);
         
         // Create report record
         await apiRequest("POST", "/api/reports", {
           name: `PDF Report - ${new Date().toLocaleDateString()}`,
-          type: "pdf"
+          type: "pdf",
+          projectId: projectId || undefined, // Set project ID if provided
+          emailCopy: false,
+          syncAfter: true,
+          showPdf: false
         });
         
         queryClient.invalidateQueries({ queryKey: ["/api/reports"] });
         
         toast({
           title: "PDF Report Generated",
-          description: `Your report has been downloaded as ${filename}`,
+          description: `Your virtual showroom location ID form has been downloaded as ${filename}`,
         });
       } else {
         throw new Error(data.message || "Failed to generate PDF report");
@@ -79,6 +87,11 @@ const ReportGenerators = () => {
     } finally {
       setIsGeneratingPDF(false);
     }
+  };
+  
+  // Handler for the button click (no parameters)
+  const handleGeneratePDFReport = () => {
+    generateProjectPDF();
   };
   
   return (
@@ -125,7 +138,7 @@ const ReportGenerators = () => {
           </div>
         </div>
         <button 
-          onClick={handleGeneratePDFReport}
+          onClick={() => handleGeneratePDFReport()}
           disabled={isGeneratingPDF}
           className="bg-red-500 text-white px-4 py-2 rounded-lg w-full flex items-center justify-center disabled:opacity-70"
         >

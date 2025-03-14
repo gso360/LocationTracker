@@ -67,7 +67,8 @@ export const generateExcelReport = async (
 
 // Generate a PDF report with location photos
 export const generatePDFReport = async (
-  data: Location[]
+  data: (Location & { barcodes: Barcode[] })[], 
+  projectData?: any
 ): Promise<string> => {
   // Create PDF document
   const doc = new jsPDF({
@@ -77,83 +78,131 @@ export const generatePDFReport = async (
   });
   
   // Add title
-  doc.setFontSize(18);
-  doc.setTextColor(45, 55, 72); // Dark gray
-  doc.text('Inventory Location Report', 105, 15, { align: 'center' });
-  doc.setDrawColor(45, 85, 255); // Blue
-  doc.line(20, 20, 190, 20);
+  doc.setFontSize(14);
+  doc.setTextColor(0, 0, 0); // Black
+  doc.text('Virtual Showroom Location ID Form', 105, 15, { align: 'center' });
   
-  // Add generation date
+  // Create header table with project info
+  const showroomName = projectData?.name || 'Not specified';
+  const scanDate = projectData?.scanDate || formatDate(new Date());
+  const tourId = projectData?.tourId || 'Not specified';
+  const groupIdType = projectData?.groupIdType || 'GroupID (1-400)';
+  
+  // Create showroom info table
+  doc.setLineWidth(0.2);
+  doc.setDrawColor(0);
+  
+  // Table header with showroom info
+  // First row
+  doc.rect(20, 25, 85, 10);
+  doc.rect(105, 25, 85, 10);
   doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
-  doc.text(`Generated on ${formatDate(new Date())}`, 105, 25, { align: 'center' });
+  doc.text('Showroom Name', 22, 31);
+  doc.text('Date', 107, 31);
   
-  // Add each location
-  let yPos = 35;
+  // Second row
+  doc.rect(20, 35, 85, 10);
+  doc.rect(105, 35, 85, 10);
+  doc.setFontSize(10);
+  doc.setTextColor(0, 0, 0);
+  doc.text(showroomName, 22, 41);
+  doc.text(scanDate, 107, 41);
+  
+  // Third row
+  doc.rect(20, 45, 85, 10);
+  doc.rect(105, 45, 85, 10);
+  doc.text('Tour ID', 22, 51);
+  doc.text('Group ID Type', 107, 51);
+  
+  // Fourth row
+  doc.rect(20, 55, 85, 10);
+  doc.rect(105, 55, 85, 10);
+  doc.text(tourId, 22, 61);
+  doc.text(groupIdType, 107, 61);
+  
+  // Add each location with photo
+  let yPos = 75;
   
   for (let i = 0; i < data.length; i++) {
     const location = data[i];
     
     // Check if we need a new page
-    if (yPos > 250) {
+    if (yPos > 230) {
       doc.addPage();
       yPos = 20;
-    }
-    
-    // Add location name
-    doc.setFontSize(14);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`Location #${location.name}`, 20, yPos);
-    yPos += 7;
-    
-    // Add creation date
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Created: ${formatDate(new Date(location.createdAt))}`, 20, yPos);
-    yPos += 10;
-    
-    // Add location notes if any
-    if (location.notes) {
-      doc.setFontSize(10);
-      doc.setTextColor(80, 80, 80);
-      doc.text(`Notes: ${location.notes}`, 20, yPos);
-      yPos += 10;
     }
     
     // Add location image if available
     if (location.imageData) {
       try {
-        // Set image dimensions (max width 150mm, proportional height)
-        const imgWidth = 150;
-        const imgHeight = 100; // Assuming aspect ratio, adjust as needed
+        // Set image dimensions to maintain aspect ratio but fit within bounds
+        const imgWidth = 80; // Fixed width in mm
+        const imgHeight = 60; // Fixed height for consistent layout
         
         doc.addImage(location.imageData, 'JPEG', 20, yPos, imgWidth, imgHeight);
-        yPos += imgHeight + 15;
+        
+        // Add GroupID number on the right side
+        doc.setFontSize(16);
+        doc.setTextColor(0, 0, 0);
+        doc.text(location.name, 170, yPos + 30, { align: 'center' });
+        
+        yPos += imgHeight + 15; // Move down for next image
       } catch (error) {
         // If image loading fails, add a placeholder text
-        doc.setFontSize(10);
-        doc.setTextColor(200, 0, 0);
-        doc.text('Error loading image', 20, yPos);
-        yPos += 20;
+        doc.setFillColor(240, 240, 240);
+        doc.rect(20, yPos, 80, 60, 'F');
+        doc.setFontSize(12);
+        doc.setTextColor(150, 150, 150);
+        doc.text('Image not available', 60, yPos + 30, { align: 'center' });
+        
+        // Still show the GroupID number
+        doc.setFontSize(16);
+        doc.setTextColor(0, 0, 0);
+        doc.text(location.name, 170, yPos + 30, { align: 'center' });
+        
+        yPos += 75;
       }
     } else {
       // No image placeholder
       doc.setFillColor(240, 240, 240);
-      doc.rect(20, yPos, 150, 80, 'F');
+      doc.rect(20, yPos, 80, 60, 'F');
       doc.setFontSize(12);
       doc.setTextColor(150, 150, 150);
-      doc.text('No image available', 95, yPos + 40, { align: 'center' });
-      yPos += 90;
+      doc.text('No image available', 60, yPos + 30, { align: 'center' });
+      
+      // Still show the GroupID number
+      doc.setFontSize(16);
+      doc.setTextColor(0, 0, 0);
+      doc.text(location.name, 170, yPos + 30, { align: 'center' });
+      
+      yPos += 75;
     }
     
-    // Add a separator line
-    doc.setDrawColor(220, 220, 220);
-    doc.line(20, yPos, 190, yPos);
-    yPos += 15;
+    // If we have notes, add them in a smaller font
+    if (location.notes) {
+      doc.setFontSize(8);
+      doc.setTextColor(80, 80, 80);
+      
+      // Split notes if too long
+      const maxWidth = 150;
+      const lines = doc.splitTextToSize(location.notes, maxWidth);
+      doc.text(lines, 20, yPos - 10);
+      
+      if (lines.length > 1) {
+        yPos += lines.length * 4; // Add space for multi-line notes
+      }
+    }
+    
+    // If we have barcodes, list them
+    if (location.barcodes && location.barcodes.length > 0) {
+      doc.setFontSize(8);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Barcodes: ${location.barcodes.map(b => b.value).join(", ")}`, 20, yPos - 5);
+    }
   }
   
   // Save the PDF
-  const filename = `location_photo_report_${new Date().toISOString().split('T')[0]}.pdf`;
+  const filename = `showroom_location_report_${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(filename);
   
   return filename;

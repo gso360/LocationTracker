@@ -415,6 +415,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const projectId = req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined;
       
       let locations;
+      let projectData = null;
+      
       if (projectId) {
         // Get locations for a specific project
         const project = await storage.getProject(projectId);
@@ -424,15 +426,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
             message: "Project not found" 
           });
         }
+        
+        // Store project data for the PDF header
+        projectData = project;
+        
+        // Get locations for this project
         locations = await storage.getLocationsByProject(projectId);
       } else {
         // Get all locations
         locations = await storage.getLocations();
       }
       
+      // Add barcodes to each location for inclusion in the PDF
+      const locationsWithBarcodes = await Promise.all(
+        locations.map(async (location) => {
+          const barcodes = await storage.getBarcodesByLocation(location.id);
+          return {
+            ...location,
+            barcodes
+          };
+        })
+      );
+      
       res.json({
         success: true,
-        data: locations
+        data: locationsWithBarcodes,
+        projectData: projectData
       });
     } catch (error) {
       res.status(500).json({ 

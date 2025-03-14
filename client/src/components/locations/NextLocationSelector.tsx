@@ -4,6 +4,7 @@ import { Plus, ArrowLeft, MapPin, CheckCircle, Download } from "lucide-react";
 import type { Location, Barcode } from "@shared/schema";
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { generatePDFReport } from "@/lib/file-utils";
 
 interface NextLocationSelectorProps {
   locations: (Location & { barcodes: Barcode[] })[];
@@ -73,14 +74,35 @@ const NextLocationSelector = ({ locations, projectId, onBack }: NextLocationSele
       const reportData = {
         projectId,
         name: `Project Report - ${new Date().toLocaleDateString()}`,
-        type: "excel",  // Default to excel type
+        type: "pdf",  // Change to PDF type for the virtual showroom format
         emailCopy: false,
         syncAfter: true,
         showPdf: false
       };
       
+      // Create the report in the database
       const response = await apiRequest("POST", "/api/reports", reportData);
       const report = await response.json();
+      
+      // Generate a PDF report for this project
+      try {
+        // Get project details and locations with barcodes
+        const pdfResponse = await apiRequest("GET", `/api/exports/pdf?projectId=${projectId}`);
+        const pdfData = await pdfResponse.json();
+        
+        if (pdfData.success) {
+          // Generate the PDF with the project data included
+          await generatePDFReport(pdfData.data, pdfData.projectData);
+          
+          toast({
+            title: "Virtual Showroom Location ID Form Generated",
+            description: "Your location ID form has been downloaded. You can view it in your downloads folder.",
+          });
+        }
+      } catch (pdfError) {
+        console.error("PDF generation error:", pdfError);
+        // Don't fail the submission if PDF generation fails
+      }
       
       toast({
         title: "Submission successful!",
@@ -90,7 +112,7 @@ const NextLocationSelector = ({ locations, projectId, onBack }: NextLocationSele
       // Navigate to project list
       setTimeout(() => {
         window.location.href = "/";
-      }, 1500);
+      }, 2500); // Increased timeout to allow for PDF download
     } catch (error) {
       toast({
         title: "Submission failed",
