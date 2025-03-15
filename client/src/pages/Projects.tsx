@@ -283,17 +283,13 @@ export default function Projects() {
             </div>
             
             <div>
-              <Label htmlFor="group-id-type">GroupID Type</Label>
-              <select
+              <Label htmlFor="group-id-type">GroupID Prefix</Label>
+              <Input
                 id="group-id-type"
                 value={groupIdType}
                 onChange={(e) => setGroupIdType(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              >
-                <option value="1-400">1-400</option>
-                <option value="S1-X">S1-X</option>
-                <option value="Custom">Custom</option>
-              </select>
+                placeholder="Enter GroupID prefix"
+              />
             </div>
             
             <div>
