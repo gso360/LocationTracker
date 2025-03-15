@@ -147,9 +147,23 @@ const NextLocationSelector = ({ locations, projectId, onBack }: NextLocationSele
         </p>
       </div>
 
-      {/* List of existing locations */}
+      {/* List of existing locations (sorted by GroupID in ascending order) */}
       <div className="mb-6 space-y-3">
-        {locations.map((location) => (
+        {[...locations]
+          .sort((a, b) => {
+            // Parse as numbers if possible for proper numeric sorting
+            const numA = parseInt(a.name);
+            const numB = parseInt(b.name);
+            
+            // If both are valid numbers, compare numerically
+            if (!isNaN(numA) && !isNaN(numB)) {
+              return numA - numB;
+            }
+            
+            // Otherwise, fall back to string comparison
+            return a.name.localeCompare(b.name);
+          })
+          .map((location) => (
           <div 
             key={location.id}
             onClick={() => handleLocationClick(location.id)}

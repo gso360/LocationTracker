@@ -8,23 +8,38 @@ import { formatDate } from './utils';
 export const generateExcelReport = async (
   data: (Location & { barcodes: Barcode[] })[]
 ): Promise<string> => {
+  // Sort locations by GroupID numerically ascending
+  const sortedData = [...data].sort((a, b) => {
+    // Parse as numbers if possible for proper numeric sorting
+    const numA = parseInt(a.name);
+    const numB = parseInt(b.name);
+    
+    // If both are valid numbers, compare numerically
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return numA - numB;
+    }
+    
+    // Otherwise, fall back to string comparison
+    return a.name.localeCompare(b.name);
+  });
+  
   // Flatten the data structure for Excel
   const rows: any[] = [];
   
-  data.forEach(location => {
+  sortedData.forEach(location => {
     if (location.barcodes.length === 0) {
       // Include locations even without barcodes
       rows.push({
-        'Location ID': location.name,
         'Barcode': '',
+        'GroupID': location.name,
         'Notes': location.notes || '',
         'Created': formatDate(new Date(location.createdAt))
       });
     } else {
       location.barcodes.forEach(barcode => {
         rows.push({
-          'Location ID': location.name,
           'Barcode': barcode.value,
+          'GroupID': location.name,
           'Notes': location.notes || '',
           'Created': formatDate(new Date(location.createdAt))
         });
@@ -39,8 +54,8 @@ export const generateExcelReport = async (
   
   // Auto-size columns
   const colWidths = [
-    { wch: 15 }, // Location ID
     { wch: 20 }, // Barcode
+    { wch: 15 }, // GroupID
     { wch: 30 }, // Notes
     { wch: 15 }  // Created
   ];
@@ -70,6 +85,21 @@ export const generatePDFReport = async (
   data: (Location & { barcodes: Barcode[] })[], 
   projectData?: any
 ): Promise<string> => {
+  // Sort GroupIDs in ascending order (lowest first)
+  const sortedData = [...data].sort((a, b) => {
+    // Parse as numbers if possible for proper numeric sorting
+    const numA = parseInt(a.name);
+    const numB = parseInt(b.name);
+    
+    // If both are valid numbers, compare numerically
+    if (!isNaN(numA) && !isNaN(numB)) {
+      return numA - numB;
+    }
+    
+    // Otherwise, fall back to string comparison
+    return a.name.localeCompare(b.name);
+  });
+  
   // Create PDF document
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -123,8 +153,8 @@ export const generatePDFReport = async (
   // Add each location with photo
   let yPos = 75;
   
-  for (let i = 0; i < data.length; i++) {
-    const location = data[i];
+  for (let i = 0; i < sortedData.length; i++) {
+    const location = sortedData[i];
     
     // Check if we need a new page
     if (yPos > 230) {
