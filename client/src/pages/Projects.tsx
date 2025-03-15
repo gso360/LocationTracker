@@ -288,7 +288,7 @@ export default function Projects() {
                 id="group-id-type"
                 value={groupIdType}
                 onChange={(e) => setGroupIdType(e.target.value)}
-                placeholder="Enter GroupID prefix"
+                placeholder="S25-"
               />
             </div>
             
