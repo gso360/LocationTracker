@@ -18,7 +18,7 @@ const ReportGenerators = () => {
       const data = await response.json();
       
       if (data.success) {
-        const filename = await generateExcelReport(data.data);
+        const filename = await generateExcelReport(data.data, data.projectData);
         
         // Create report record
         await apiRequest("POST", "/api/reports", {

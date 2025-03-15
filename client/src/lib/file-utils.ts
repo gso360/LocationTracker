@@ -47,10 +47,27 @@ export const generateExcelReport = async (
     }
   });
   
+  // Create filename based on project details
+  const getFileName = (project?: any) => {
+    const date = new Date().toLocaleString().replace(/[/:\\]/g, '-');
+    if (!project) return `Inventory-${date}`;
+    
+    const parts = [project.name];
+    if (project.lineVendor) parts.push(project.lineVendor);
+    if (project.scannerName) parts.push(project.scannerName);
+    parts.push(date);
+    
+    return parts.join(' - ');
+  };
+
   // Create workbook and worksheet
   const worksheet = XLSX.utils.json_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Inventory');
+
+  // Use project data from first location if available
+  const projectData = sortedData[0]?.project;
+  const fileName = getFileName(projectData);
   
   // Auto-size columns
   const colWidths = [
