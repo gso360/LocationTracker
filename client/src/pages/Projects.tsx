@@ -30,7 +30,7 @@ export default function Projects() {
   const [scannerName, setScannerName] = useState("");
   const [tourId, setTourId] = useState("");
   const [scanDate, setScanDate] = useState(new Date().toISOString().split('T')[0]);
-  const [groupIdType, setGroupIdType] = useState("1-400");
+  const [groupIdType, setGroupIdType] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
