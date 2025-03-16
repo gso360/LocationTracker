@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "wouter";
-import { ArrowLeft, Camera, ChevronDown } from "lucide-react";
+import { ArrowLeft, Camera, ChevronDown, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -10,6 +10,8 @@ import AddLocationForm from "@/components/locations/AddLocationForm";
 import NextLocationSelector from "@/components/locations/NextLocationSelector";
 import { useQuery } from "@tanstack/react-query";
 import type { Location, Barcode, Project } from "@shared/schema";
+import { useTour } from "@/contexts/TourContext";
+import { useBluetoothBarcode } from "@/components/locations/BluetoothBarcodeManager";
 import { 
   Dialog,
   DialogContent,
@@ -528,7 +530,7 @@ const AddLocation = () => {
             
             {/* Project selection dropdown */}
             {!locationId && projectId && (
-              <div className="w-1/2">
+              <div className="w-1/2 project-dropdown">
                 <Select
                   value={String(projectId)}
                   onValueChange={(value) => {
