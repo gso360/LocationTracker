@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, Link } from "wouter";
-import { Menu, LogOut, User } from "lucide-react";
+import { Menu, LogOut, User, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -17,7 +17,11 @@ const Header = () => {
   const [location] = useLocation();
   const isProjectsPage = location === "/" || location === "/projects" || location.startsWith("/projects/");
   const isLocationsPage = location === "/locations" || location === "/add-location" || location.startsWith("/edit-location");
+  const isAdminPage = location === "/admin";
   const { user, isAuthenticated, logout } = useAuth();
+  
+  // Check if the user is an admin or superadmin
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
   
   const handleLogout = async () => {
     await logout();
@@ -78,6 +82,13 @@ const Header = () => {
             GroupIDs
           </div>
         </Link>
+        {isAdmin && (
+          <Link href="/admin">
+            <div className={`px-4 py-3 font-medium touch-target flex items-center ${isAdminPage ? 'text-[#2962FF] border-b-2 border-[#2962FF]' : 'text-gray-500'}`}>
+              <Shield className="h-4 w-4 mr-1" /> Admin
+            </div>
+          </Link>
+        )}
       </div>
     </header>
   );

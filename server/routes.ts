@@ -9,7 +9,19 @@ import {
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
-import { register, login, getCurrentUser, logout, isAuthenticated } from './auth';
+import { 
+  register, 
+  login, 
+  getCurrentUser, 
+  logout, 
+  isAuthenticated, 
+  isAdmin, 
+  isSuperAdmin, 
+  getAllUsers, 
+  approveUser, 
+  updateUserRole,
+  createInitialSuperadmin
+} from './auth';
 
 // Helper function to format dates
 function formatDate(date: Date): string {
@@ -604,6 +616,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // User Management Routes (Admin Only)
+  
+  // Create initial superadmin if needed
+  createInitialSuperadmin();
+  
+  // Get all users (admin only)
+  router.get("/admin/users", isAdmin, getAllUsers);
+  
+  // Get pending users (admin only)
+  router.get("/admin/users/pending", isAdmin, async (req: Request, res: Response) => {
+    try {
+      const pendingUsers = await storage.getPendingUsers();
+      // Remove passwords from users
+      const usersWithoutPasswords = pendingUsers.map(user => {
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+      });
+      
+      res.json(usersWithoutPasswords);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching pending users' });
+    }
+  });
+  
+  // Approve a user (admin only)
+  router.post("/admin/users/:id/approve", isAdmin, approveUser);
+  
+  // Update user role (super admin only)
+  router.patch("/admin/users/:id/role", isSuperAdmin, updateUserRole);
 
   app.use("/api", router);
 

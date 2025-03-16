@@ -11,6 +11,7 @@ import Projects from "./pages/Projects";
 import ProjectLocations from "./pages/ProjectLocations";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import AdminPage from "./pages/Admin";
 import MobileQRCode from "./components/MobileQRCode";
 import BluetoothBarcodeProvider from "./components/locations/BluetoothBarcodeManager";
 import WelcomeTour from "./components/WelcomeTour";
@@ -24,6 +25,7 @@ const ProtectedLocations = withAuth(Locations);
 const ProtectedReports = withAuth(Reports);
 const ProtectedAddLocation = withAuth(AddLocation);
 const ProtectedProjectLocations = withAuth(ProjectLocations);
+const ProtectedAdmin = withAuth(AdminPage);
 
 // Home component that redirects to the appropriate page based on auth status
 function Home() {
@@ -58,6 +60,7 @@ function Router() {
       <Route path="/projects/:id" component={ProtectedProjectLocations} />
       <Route path="/projects/:projectId/add-location" component={ProtectedAddLocation} />
       <Route path="/projects/:id/reports" component={ProtectedReports} />
+      <Route path="/admin" component={ProtectedAdmin} />
       <Route component={NotFound} />
     </Switch>
   );
