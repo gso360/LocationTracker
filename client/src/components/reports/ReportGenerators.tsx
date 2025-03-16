@@ -27,8 +27,13 @@ const ReportGenerators = ({ projectId }: ReportGeneratorsProps) => {
         const filename = await generateExcelReport(data.data, data.projectData);
         
         // Create report record with project ID if available
+        // Use project info for the report name if available
+        const reportName = data.projectData 
+          ? `Excel Report - ${data.projectData.name} - ${new Date().toLocaleDateString()} - ${data.projectData.scannerName || 'Unknown'}`
+          : `Excel Report - ${new Date().toLocaleDateString()}`;
+          
         const reportData: any = {
-          name: `Excel Report - ${new Date().toLocaleDateString()}`,
+          name: reportName,
           type: "excel",
           emailCopy: false,
           syncAfter: true,
@@ -77,9 +82,13 @@ const ReportGenerators = ({ projectId }: ReportGeneratorsProps) => {
         // Pass both location data and project data to the PDF generator
         const filename = await generatePDFReport(data.data, data.projectData);
         
-        // Create report record
+        // Create report record with project info for the name if available
+        const reportName = data.projectData 
+          ? `PDF Report - ${data.projectData.name} - ${new Date().toLocaleDateString()} - ${data.projectData.scannerName || 'Unknown'}`
+          : `PDF Report - ${new Date().toLocaleDateString()}`;
+            
         const reportData: any = {
-          name: `PDF Report - ${new Date().toLocaleDateString()}`,
+          name: reportName,
           type: "pdf",
           emailCopy: false,
           syncAfter: true,
