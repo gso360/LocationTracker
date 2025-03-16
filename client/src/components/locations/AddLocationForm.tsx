@@ -89,27 +89,25 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
       
       {/* Photo Section */}
       {!imageData ? (
-        <div className="fixed inset-0 z-50 bg-black min-h-screen">
-          <div className="absolute inset-0 flex flex-col">
-            <div className="p-4 flex items-center justify-between bg-black/50">
-              <h3 className="font-medium text-white">Capture GroupID Photo</h3>
+        <div className="bg-white rounded-lg shadow mb-6 overflow-hidden">
+          <div className="p-4 border-b">
+            <h3 className="font-medium">Capture GroupID Photo</h3>
+          </div>
+          
+          <div className="bg-gray-900 aspect-video flex items-center justify-center">
+            <div className="text-white opacity-50">
+              <Camera className="h-10 w-10 mx-auto mb-2" />
+              <p>Click the button below to take a photo</p>
             </div>
-            
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-white opacity-50 text-center">
-                <Camera className="h-10 w-10 mx-auto mb-2" />
-                <p className="text-sm">Click the button below to take a photo</p>
-              </div>
-            </div>
-            
-            <div className="fixed bottom-8 left-0 right-0 flex justify-center">
-              <button 
-                onClick={handleCapturePhoto}
-                className="bg-[#FF6D00] text-white rounded-full w-20 h-20 flex items-center justify-center"
-              >
-                <Camera className="h-8 w-8" />
-              </button>
-            </div>
+          </div>
+          
+          <div className="p-4 flex justify-center">
+            <button 
+              onClick={handleCapturePhoto}
+              className="bg-[#FF6D00] text-white rounded-full w-16 h-16 flex items-center justify-center"
+            >
+              <Camera className="h-6 w-6" />
+            </button>
           </div>
         </div>
       ) : (
