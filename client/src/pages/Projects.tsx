@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
-import { PlusCircle, Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { PlusCircle, Edit, Trash2, CheckCircle, XCircle, FileText } from "lucide-react";
 import { type Project } from "@shared/schema";
 
 export default function Projects() {
@@ -252,13 +252,23 @@ export default function Projects() {
                 {project.description && (
                   <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
                 )}
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => setLocation(`/projects/${project.id}`)}
-                >
-                  Create GroupIDs
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setLocation(`/projects/${project.id}`)}
+                  >
+                    Create GroupIDs
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setLocation(`/projects/${project.id}/reports`)}
+                  >
+                    <FileText className="h-4 w-4 mr-1" />
+                    View Reports
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
