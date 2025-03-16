@@ -6,7 +6,6 @@ const Header = () => {
   const [location] = useLocation();
   const isProjectsPage = location === "/" || location === "/projects" || location.startsWith("/projects/");
   const isLocationsPage = location === "/locations" || location === "/add-location" || location.startsWith("/edit-location");
-  const isReportsPage = location === "/reports";
   
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
@@ -46,11 +45,6 @@ const Header = () => {
         <Link href="/locations">
           <div className={`px-4 py-3 font-medium touch-target ${isLocationsPage ? 'text-[#2962FF] border-b-2 border-[#2962FF]' : 'text-gray-500'}`}>
             GroupIDs
-          </div>
-        </Link>
-        <Link href="/reports">
-          <div className={`px-4 py-3 font-medium touch-target ${isReportsPage ? 'text-[#2962FF] border-b-2 border-[#2962FF]' : 'text-gray-500'}`}>
-            Reports
           </div>
         </Link>
       </div>
