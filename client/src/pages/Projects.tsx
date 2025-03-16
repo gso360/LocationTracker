@@ -177,13 +177,14 @@ export default function Projects() {
         <div className="flex items-center">
           <h1 className="text-2xl font-bold">Showroom Projects</h1>
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="sm" 
-            className="ml-2" 
+            className="ml-2 flex items-center" 
             title="Start tour"
             onClick={() => startTour('projects')}
           >
-            <Info className="h-4 w-4" />
+            <Info className="h-4 w-4 mr-1" />
+            Tour
           </Button>
         </div>
         <Button 

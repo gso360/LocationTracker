@@ -85,10 +85,7 @@ const TourManager: React.FC = () => {
       const tourConfig = tourConfigs[currentTour];
       
       if (tourConfig && shepherd) {
-        // Clear any existing tour - handle both types
-        if (shepherd.tour) {
-          shepherd.tour.cancel();
-        }
+        // No need to cancel existing tour since ShepherdJourneyProvider handles this
         
         // Set default options
         const tour = new Shepherd.Tour({
