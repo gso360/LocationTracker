@@ -49,19 +49,30 @@ const AddLocation = () => {
     }
   });
   
+  // Check if projects exist to show project selection if needed
+  const { data: projectsData } = useQuery({
+    queryKey: ['/api/projects'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/projects');
+      return await response.json();
+    },
+    enabled: !projectId && !locationId, // Only fetch if we don't have a project ID and aren't editing
+  });
+  
   // Fetch the next location number if we're adding a new location
   const { data: nextNumberData } = useQuery({
     queryKey: ['/api/projects', projectId, 'next-location-number'],
     queryFn: async () => {
       if (projectId) {
+        // Use project-specific endpoint if we have a projectId
         const response = await apiRequest('GET', `/api/projects/${projectId}/next-location-number`);
         return await response.json();
       } else {
-        const response = await apiRequest('GET', '/api/locations/next-number');
-        return await response.json();
+        // Without a projectId, we shouldn't be able to proceed
+        return { nextNumber: null, error: "No project selected" };
       }
     },
-    enabled: !locationId,
+    enabled: !locationId && !!projectId, // Only enabled when we have a projectId and aren't editing
   });
   
   // If editing, fetch the existing location data

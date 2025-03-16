@@ -322,11 +322,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get next available location number
+  // Get next available location number (requires projectId as query param)
   router.get("/locations/next-number", async (req: Request, res: Response) => {
     try {
-      const nextNumber = await storage.getNextLocationNumber();
-      res.json({ nextNumber });
+      const projectId = req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined;
+      
+      // Check if project exists if projectId is provided
+      if (projectId) {
+        const project = await storage.getProject(projectId);
+        if (!project) {
+          return res.status(404).json({ message: "Project not found" });
+        }
+        
+        const nextNumber = await storage.getNextLocationNumber(projectId);
+        res.json({ nextNumber });
+      } else {
+        // For backward compatibility, but should discourage use without projectId
+        res.status(400).json({ message: "projectId query parameter is required" });
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to generate next location number" });
     }
