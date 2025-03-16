@@ -35,7 +35,8 @@ export default function Projects() {
   const [groupIdType, setGroupIdType] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const { startTour, hasTakenTour } = useTour();
+  
   const { data, isLoading } = useQuery({
     queryKey: ['/api/projects'],
     queryFn: async () => {
@@ -43,6 +44,18 @@ export default function Projects() {
       return await response.json();
     }
   });
+  
+  // Check if the user has taken the projects tour
+  useEffect(() => {
+    // Only start the tour after projects are loaded and if it hasn't been taken before
+    if (!isLoading && !hasTakenTour('projects')) {
+      // Start the tour after a slight delay to ensure the UI is fully rendered
+      const timer = setTimeout(() => {
+        startTour('projects');
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, startTour, hasTakenTour]);
 
   const projects: Project[] = data || [];
 
@@ -161,7 +174,18 @@ export default function Projects() {
   return (
     <div className="container mx-auto py-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Showroom Projects</h1>
+        <div className="flex items-center">
+          <h1 className="text-2xl font-bold">Showroom Projects</h1>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="ml-2" 
+            title="Start tour"
+            onClick={() => startTour('projects')}
+          >
+            <Info className="h-4 w-4" />
+          </Button>
+        </div>
         <Button 
           className="create-project-button"
           onClick={() => {
