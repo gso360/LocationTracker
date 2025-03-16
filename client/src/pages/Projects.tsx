@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,8 +17,9 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
-import { PlusCircle, Edit, Trash2, CheckCircle, XCircle, FileText } from "lucide-react";
+import { PlusCircle, Edit, Trash2, CheckCircle, XCircle, FileText, Info } from "lucide-react";
 import { type Project } from "@shared/schema";
+import { useTour } from "@/contexts/TourContext";
 
 export default function Projects() {
   const { toast } = useToast();
@@ -161,11 +162,14 @@ export default function Projects() {
     <div className="container mx-auto py-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Showroom Projects</h1>
-        <Button onClick={() => {
-          setProjectName("");
-          setProjectDescription("");
-          setIsCreateDialogOpen(true);
-        }}>
+        <Button 
+          className="create-project-button"
+          onClick={() => {
+            setProjectName("");
+            setProjectDescription("");
+            setIsCreateDialogOpen(true);
+          }}
+        >
           <PlusCircle className="mr-2 h-4 w-4" />
           New Project
         </Button>
@@ -185,7 +189,7 @@ export default function Projects() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 projects-list">
           {projects.map((project) => (
             <Card key={project.id} className="overflow-hidden">
               <CardHeader className="pb-2">
