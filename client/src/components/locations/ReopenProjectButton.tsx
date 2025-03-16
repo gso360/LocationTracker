@@ -12,7 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { RefreshCcw } from "lucide-react";
 
@@ -35,6 +35,9 @@ const ReopenProjectButton: React.FC<ReopenProjectButtonProps> = ({
       setIsReopening(true);
       
       const response = await apiRequest("POST", `/api/projects/${projectId}/reopen`);
+      
+      // Invalidate projects query to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       
       toast({
         title: "Project Reopened",
