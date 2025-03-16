@@ -128,8 +128,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update a project
-  router.patch("/projects/:id", async (req: Request, res: Response) => {
+  router.patch("/projects/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
+      const user = req.user as User;
       const id = parseInt(req.params.id, 10);
       const project = await storage.getProject(id);
       
@@ -137,11 +138,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Project not found" });
       }
       
+      // In a future update, we can check if the user is the owner of the project
+      // For now, allow any authenticated user to update projects
+      // Super admins can update any project
+      
       // Validate only the fields that are present in the request
       const updateData: any = {};
       
       if (req.body.name !== undefined) updateData.name = req.body.name;
       if (req.body.description !== undefined) updateData.description = req.body.description;
+      if (req.body.lineVendor !== undefined) updateData.lineVendor = req.body.lineVendor;
+      if (req.body.scannerName !== undefined) updateData.scannerName = req.body.scannerName;
+      if (req.body.tourId !== undefined) updateData.tourId = req.body.tourId;
+      if (req.body.scanDate !== undefined) updateData.scanDate = req.body.scanDate;
+      if (req.body.groupIdType !== undefined) updateData.groupIdType = req.body.groupIdType;
       
       const updatedProject = await storage.updateProject(id, updateData);
       res.json(updatedProject);
@@ -151,9 +161,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete a project
-  router.delete("/projects/:id", async (req: Request, res: Response) => {
+  router.delete("/projects/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
+      const user = req.user as User;
       const id = parseInt(req.params.id, 10);
+      
+      // For super strict security, we might want to limit this to superadmins
+      // if (user.role !== 'superadmin') {
+      //   return res.status(403).json({ message: "Not authorized. Only superadmins can delete projects." });
+      // }
+      
+      const project = await storage.getProject(id);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
       const success = await storage.deleteProject(id);
       
       if (!success) {
@@ -167,8 +190,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Toggle project status (in_progress/completed)
-  router.patch("/projects/:id/toggle-status", async (req: Request, res: Response) => {
+  router.patch("/projects/:id/toggle-status", isAuthenticated, async (req: Request, res: Response) => {
     try {
+      const user = req.user as User;
       const id = parseInt(req.params.id, 10);
       const project = await storage.getProject(id);
       
@@ -187,8 +211,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Submit a project - mark as complete and set submission data
-  router.post("/projects/:id/submit", async (req: Request, res: Response) => {
+  router.post("/projects/:id/submit", isAuthenticated, async (req: Request, res: Response) => {
     try {
+      const user = req.user as User;
       const id = parseInt(req.params.id, 10);
       const project = await storage.getProject(id);
       
@@ -248,8 +273,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Reopen a project that was previously submitted
-  router.post("/projects/:id/reopen", async (req: Request, res: Response) => {
+  router.post("/projects/:id/reopen", isAuthenticated, async (req: Request, res: Response) => {
     try {
+      const user = req.user as User;
       const id = parseInt(req.params.id, 10);
       const project = await storage.getProject(id);
       
@@ -260,6 +286,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!project.submitted) {
         return res.status(400).json({ message: "Project is not in submitted state" });
       }
+      
+      // For super admins, allow reopening of any project
+      // In a future update, we could add project ownership and restrict reopening
+      // to only the owner and super admins
       
       // Reopen the project
       const updatedProject = await storage.updateProject(id, { 
