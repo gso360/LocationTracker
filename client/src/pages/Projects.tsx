@@ -274,7 +274,7 @@ export default function Projects() {
                   <Button 
                     variant="outline" 
                     className="w-full"
-                    onClick={() => setLocation(`/projects/${project.id}`)}
+                    onClick={() => window.location.href = `/projects/${project.id}`}
                   >
                     {project.submitted ? 'View GroupIDs' : 'Create GroupIDs'}
                   </Button>
@@ -282,7 +282,7 @@ export default function Projects() {
                     <Button 
                       variant="outline" 
                       className="w-full"
-                      onClick={() => setLocation(`/projects/${project.id}/reports`)}
+                      onClick={() => window.location.href = `/projects/${project.id}/reports`}
                     >
                       <FileText className="h-4 w-4 mr-1" />
                       View Reports

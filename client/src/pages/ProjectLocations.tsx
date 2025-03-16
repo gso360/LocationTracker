@@ -153,7 +153,7 @@ export default function ProjectLocations() {
               Select Next GroupID
             </Button>
           )}
-          <Button onClick={() => setLocation(`/projects/${projectId}/add-location`)}>
+          <Button onClick={() => window.location.href = `/projects/${projectId}/add-location`}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add New GroupID
           </Button>
@@ -168,7 +168,7 @@ export default function ProjectLocations() {
         <div className="text-center py-8">
           <h3 className="font-semibold mb-2">No GroupIDs Added</h3>
           <p className="mb-4">Select the GroupID to work with</p>
-          <Button onClick={() => setLocation(`/projects/${projectId}/add-location`)}>
+          <Button onClick={() => window.location.href = `/projects/${projectId}/add-location`}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Add First GroupID
           </Button>

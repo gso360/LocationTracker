@@ -28,7 +28,7 @@ const Reports = () => {
           const response = await apiRequest('GET', `/api/projects/${projectId}`);
           const projectData = await response.json();
           if (projectData.status !== 'completed') {
-            setLocation('/');
+            window.location.href = '/';
             toast({
               title: "Access Denied",
               description: "Reports are only available for submitted projects",
@@ -68,7 +68,7 @@ const Reports = () => {
             variant="outline" 
             size="sm" 
             className="mb-2"
-            onClick={() => setLocation(`/projects/${projectId}`)}
+            onClick={() => window.location.href = `/projects/${projectId}`}
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to Project
