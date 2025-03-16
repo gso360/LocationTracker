@@ -17,7 +17,6 @@ const Header = () => {
           >
             <Menu className="h-6 w-6 text-[#455A64]" />
           </button>
-          <h1 className="text-xl font-medium text-[#455A64]">Showroom Manager</h1>
         </div>
         <div>
           <button 
