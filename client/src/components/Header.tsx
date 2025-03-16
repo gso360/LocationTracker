@@ -9,17 +9,6 @@ const Header = () => {
   
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-      <div className="flex justify-between items-center px-4 py-3">
-        <div className="flex items-center">
-          <button 
-            className="p-2 rounded-full hover:bg-gray-100 mr-2 md:hidden touch-target" 
-            aria-label="Menu"
-          >
-            <Menu className="h-6 w-6 text-[#455A64]" />
-          </button>
-        </div>
-      </div>
-      
       {/* Tab Navigation */}
       <div className="flex border-b border-gray-200">
         <Link href="/">
