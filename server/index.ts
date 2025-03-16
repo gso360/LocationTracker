@@ -1,13 +1,42 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import session from "express-session";
+import passport from "passport";
+import { setupPassport } from "./auth";
+import MemoryStore from "memorystore";
 
+const MemoryStoreSession = MemoryStore(session);
 const app = express();
+
 // Increase JSON body size limit to 10MB to accommodate image uploads
 app.use(express.json({ limit: '10mb' }));
+
 // Increase URL-encoded body size limit to 10MB for form submissions with images
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
+// Set up session handling with memory store
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'inventory-management-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+    store: new MemoryStoreSession({
+      checkPeriod: 86400000, // 24 hours
+    }),
+  })
+);
+
+// Set up Passport.js for authentication
+setupPassport();
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

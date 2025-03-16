@@ -9,6 +9,7 @@ import {
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { register, login, getCurrentUser, logout, isAuthenticated } from './auth';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const router = express.Router();
@@ -24,6 +25,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return { data: null, error: "Invalid request data" };
     }
   };
+  
+  // Auth routes
+  router.post("/auth/register", register);
+  router.post("/auth/login", login);
+  router.get("/auth/me", getCurrentUser);
+  router.post("/auth/logout", logout);
 
   // Projects endpoints
   
