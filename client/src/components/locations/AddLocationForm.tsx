@@ -36,7 +36,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
       {/* Location Form */}
       <div className="bg-white rounded-lg shadow p-4 mb-6">
         <div className="mb-4">
-          <label htmlFor="locationName" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="locationName" className="block text-sm font-medium text-gray-700 mb-1 location-name-field">
             GroupID Number
           </label>
           <div className="flex rounded-md overflow-hidden border border-gray-300">
@@ -89,7 +89,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
       
       {/* Photo Section */}
       {!imageData ? (
-        <div className="bg-white rounded-lg shadow mb-6 overflow-hidden">
+        <div className="bg-white rounded-lg shadow mb-6 overflow-hidden photo-capture-area">
           <div className="p-4 border-b">
             <h3 className="font-medium">Capture GroupID Photo</h3>
           </div>
@@ -165,7 +165,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
         <div className="p-4 border-t">
           <button 
             onClick={handleScanBarcode}
-            className="bg-[#2962FF] text-white px-4 py-2 rounded-lg w-full flex items-center justify-center scan-button"
+            className="bg-[#2962FF] text-white px-4 py-2 rounded-lg w-full flex items-center justify-center scan-button barcode-scanner-button"
           >
             <QrCode className="h-4 w-4 mr-1" />
             Scan Product Barcode

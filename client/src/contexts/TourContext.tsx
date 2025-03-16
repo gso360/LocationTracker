@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, ReactNode, useMemo } from 'react';
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { ShepherdJourneyProvider, useShepherd } from 'react-shepherd';
 import { useLocation } from 'wouter';
 import Shepherd from 'shepherd.js';
@@ -444,7 +444,7 @@ const tourConfigs: TourConfig = {
       }
     ]
   },
-  'add-location': {
+  'add-location-detail': {
     defaultStepOptions: {
       classes: 'shepherd-theme-custom',
       scrollTo: true,
