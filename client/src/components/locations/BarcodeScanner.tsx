@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { X, QrCode, Check, Bluetooth, ListChecks } from "lucide-react";
 import { useBluetoothBarcode, BarcodeListener } from "./BluetoothBarcodeManager";
-import KeyboardIcon from '@heroicons/react/24/solid/KeyboardIcon'; // Added import for KeyboardIcon
 
 interface BarcodeScannerProps {
   onScan: (value: string) => void;
@@ -26,16 +25,16 @@ const BarcodeScanForm = ({
   const [lastDuplicate, setLastDuplicate] = useState<string | null>(null);
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-
+  
   // iOS keyboard optimization - detect if iOS and ensure proper focus behavior
   const isMobileIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
+  
   useEffect(() => {
     // Delay focus slightly to ensure modal is fully rendered
     const timer = setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
-
+        
         // For iOS, also try to position the cursor at the end
         if (isMobileIOS) {
           const length = inputRef.current.value.length;
@@ -44,14 +43,14 @@ const BarcodeScanForm = ({
         }
       }
     }, 150);
-
+    
     return () => clearTimeout(timer);
   }, [isMobileIOS]);
 
   // Handle manual submission
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-
+    
     if (value.trim()) {
       processBarcode(value.trim());
     }
@@ -62,12 +61,12 @@ const BarcodeScanForm = ({
     // Check if barcode already exists in our current scanning session
     // or in the existing barcodes for this specific GroupID
     const isDuplicate = scannedCodes.includes(barcode) || existingBarcodes.includes(barcode);
-
+    
     if (isDuplicate) {
       // Show duplicate warning
       setLastDuplicate(barcode);
       setShowDuplicateWarning(true);
-
+      
       // Auto-hide warning after 2 seconds
       setTimeout(() => {
         setShowDuplicateWarning(false);
@@ -75,14 +74,14 @@ const BarcodeScanForm = ({
     } else {
       // Add to our local list of scanned codes
       setScannedCodes(prev => [...prev, barcode]);
-
+      
       // Pass to parent component
       onSubmit(barcode);
     }
-
+    
     // Always clear input field after scan for next barcode
     setValue('');
-
+    
     // Refocus the input for the next scan
     if (inputRef.current) {
       inputRef.current.focus();
@@ -92,7 +91,7 @@ const BarcodeScanForm = ({
   // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
-
+    
     // Auto-submit if it looks like a scan from a bluetooth scanner
     // Bluetooth scanners typically append a return character
     if (e.target.value.endsWith('\n') || e.target.value.endsWith('\r')) {
@@ -102,7 +101,7 @@ const BarcodeScanForm = ({
       }
     }
   };
-
+  
   // Listen for "Enter" key which is often sent by bluetooth scanners
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && value.trim()) {
@@ -110,7 +109,7 @@ const BarcodeScanForm = ({
       processBarcode(value.trim());
     }
   };
-
+  
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 overflow-y-auto">
       <div className="bg-white rounded-lg w-full max-w-md mx-4 my-4">
@@ -120,7 +119,7 @@ const BarcodeScanForm = ({
             {scannedCodes.length} scanned
           </div>
         </div>
-
+        
         <form onSubmit={handleSubmit}>
           <div className="p-4">
             <label htmlFor="barcodeInput" className="block text-sm font-medium text-gray-700 mb-1">
@@ -143,7 +142,7 @@ const BarcodeScanForm = ({
             <p className="text-xs text-gray-500 mt-1">
               Scanned barcodes will appear below. Continue scanning multiple barcodes without interruption.
             </p>
-
+            
             {/* Duplicate warning */}
             {showDuplicateWarning && (
               <div className="mt-2 bg-yellow-50 border border-yellow-200 rounded p-2 text-sm text-yellow-800 flex items-start">
@@ -154,7 +153,7 @@ const BarcodeScanForm = ({
               </div>
             )}
           </div>
-
+          
           {/* Recently scanned barcodes */}
           {scannedCodes.length > 0 && (
             <div className="px-4 pb-2">
@@ -172,7 +171,7 @@ const BarcodeScanForm = ({
               </div>
             </div>
           )}
-
+          
           <div className="p-4 flex justify-between items-center border-t">
             <button 
               type="button"
@@ -208,44 +207,44 @@ const ManualBarcodeEntry = ({
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
+  
   // iOS keyboard optimization
   const isMobileIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
       }
     }, 150);
-
+    
     return () => clearTimeout(timer);
   }, []);
-
+  
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-
+    
     if (!value.trim()) {
       return;
     }
-
+    
     // Check for duplicates within this specific GroupID
     if (existingBarcodes.includes(value.trim())) {
       setError("This barcode has already been added to this GroupID.");
       return;
     }
-
+    
     onSubmit(value.trim());
     onCancel();
   };
-
+  
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
       <div className="bg-white rounded-lg w-full max-w-md mx-4">
         <div className="p-4 border-b">
           <h3 className="font-medium">Enter Barcode Manually</h3>
         </div>
-
+        
         <form onSubmit={handleSubmit}>
           <div className="p-4">
             <label htmlFor="manualBarcodeInput" className="block text-sm font-medium text-gray-700 mb-1">
@@ -269,7 +268,7 @@ const ManualBarcodeEntry = ({
             />
             {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
           </div>
-
+          
           <div className="p-4 flex justify-end space-x-2 border-t">
             <button 
               type="button"
@@ -294,10 +293,11 @@ const ManualBarcodeEntry = ({
 const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existingBarcodes = [] }) => {
   const [lastScannedBarcode, setLastScannedBarcode] = useState<string | null>(null);
   const [notificationVisible, setNotificationVisible] = useState(false);
-  const [showManualEntry, setShowManualEntry] = useState(false); // Removed showBarcodeInput
+  const [showBarcodeInput, setShowBarcodeInput] = useState(false);
+  const [showManualEntry, setShowManualEntry] = useState(false);
   const [scannedCount, setScannedCount] = useState(0);
   const { startListening, stopListening } = useBluetoothBarcode();
-
+  
   // Handle barcode entry from continuous scanner - use useCallback to prevent infinite loops
   const handleBarcodeEntry = useCallback((value: string) => {
     // Prevent processing duplicates
@@ -305,34 +305,41 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existi
       // Show duplicate notification
       setLastScannedBarcode(value);
       setNotificationVisible(true);
-
+      
       // Hide notification after 2 seconds
       setTimeout(() => {
         setNotificationVisible(false);
       }, 2000);
       return;
     }
-
+    
     // Show success notification
     setLastScannedBarcode(value);
     setNotificationVisible(true);
     setScannedCount(prev => prev + 1);
-
+    
     // Hide notification after 2 seconds
     setTimeout(() => {
       setNotificationVisible(false);
     }, 2000);
-
+    
     // Pass the barcode to parent component
     onScan(value);
   }, [existingBarcodes, onScan]);
-
+  
   // Start listening when in barcode scanning mode
   useEffect(() => {
-    startListening(handleBarcodeEntry); // Start listening immediately
-    return () => stopListening();
-  }, [startListening, stopListening, handleBarcodeEntry]);
-
+    if (showBarcodeInput) {
+      startListening(handleBarcodeEntry);
+    } else {
+      stopListening();
+    }
+    
+    return () => {
+      stopListening();
+    };
+  }, [showBarcodeInput, startListening, stopListening, handleBarcodeEntry]);
+  
   return (
     <div className="h-full flex flex-col">
       <div className="bg-black text-white p-4 flex items-center">
@@ -341,18 +348,18 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existi
         </button>
         <h2 className="text-lg font-medium">Scan Barcodes</h2>
       </div>
-
+      
       <div className="flex-1 relative">
         <div className="h-full flex flex-col items-center justify-center bg-gray-100 p-4">
           <div className="bg-white rounded-lg shadow-md p-6 max-w-md w-full text-center">
             <Bluetooth className="h-16 w-16 text-[#2962FF] mx-auto mb-4" />
-
+            
             <h3 className="text-xl font-medium mb-2">Bluetooth Barcode Scanner</h3>
-
+            
             <p className="text-gray-600 mb-4">
               Connect your bluetooth scanner to scan multiple product barcodes in sequence.
             </p>
-
+            
             {/* Recently scanned barcode notification */}
             {notificationVisible && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
@@ -365,28 +372,24 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existi
                 </div>
               </div>
             )}
-
+            
             <div className="space-y-3">
-              <div className="bg-white rounded-lg">
-                <div className="relative">
-                  <div className="absolute top-4 right-4 z-10">
-                    <button
-                      onClick={() => setShowManualEntry(true)}
-                      className="bg-white/80 backdrop-blur-sm text-[#2962FF] py-2 px-3 rounded-lg flex items-center text-sm shadow-lg"
-                    >
-                      <KeyboardIcon className="h-4 w-4 mr-1" />
-                      Manual Entry
-                    </button>
-                  </div>
-
-                  <div className="p-4 pt-16">
-                    <h2 className="text-lg font-medium text-center">Scan Product Barcode</h2>
-                    <p className="text-gray-600 text-center text-sm mt-1">Center the barcode in the camera view</p>
-                  </div>
-                </div>
-              </div>
+              <button 
+                onClick={() => setShowBarcodeInput(true)}
+                className="bg-[#2962FF] text-white px-4 py-3 rounded-lg w-full font-medium flex items-center justify-center"
+              >
+                <QrCode className="h-5 w-5 mr-2" />
+                Start Scanning Barcodes
+              </button>
+              
+              <button 
+                onClick={() => setShowManualEntry(true)}
+                className="bg-white border border-gray-300 text-gray-800 px-4 py-3 rounded-lg w-full font-medium flex items-center justify-center"
+              >
+                Manual Entry
+              </button>
             </div>
-
+            
             {scannedCount > 0 && (
               <div className="mt-4 pt-4 border-t">
                 <div className="text-sm text-gray-600 mb-2">
@@ -403,7 +406,16 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existi
           </div>
         </div>
       </div>
-
+      
+      {showBarcodeInput && (
+        <BarcodeScanForm 
+          onSubmit={handleBarcodeEntry}
+          onDone={onClose}
+          onCancel={() => setShowBarcodeInput(false)}
+          existingBarcodes={existingBarcodes}
+        />
+      )}
+      
       {showManualEntry && (
         <ManualBarcodeEntry 
           onSubmit={handleBarcodeEntry}
