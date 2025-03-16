@@ -166,16 +166,7 @@ export default function ProjectLocations() {
 
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">GroupIDs</h2>
-        <div className="space-x-2">
-          {locations.length > 0 && (
-            <Button 
-              variant="outline" 
-              onClick={() => setShowLocationSelector(true)}
-              className="border-[#2962FF] text-[#2962FF]"
-            >
-              Select Next GroupID
-            </Button>
-          )}
+        <div>
           <Button 
             onClick={() => window.location.href = `/projects/${projectId}/add-location`}
             className="add-location-button"
