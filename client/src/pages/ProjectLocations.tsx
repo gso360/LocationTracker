@@ -47,7 +47,7 @@ export default function ProjectLocations() {
     return (
       <div className="container mx-auto py-4 text-center">
         <h2 className="text-xl font-semibold mb-4">Invalid Project ID</h2>
-        <Button onClick={() => setLocation('/projects')}>
+        <Button onClick={() => window.location.href = '/projects'}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Projects
         </Button>
@@ -67,7 +67,7 @@ export default function ProjectLocations() {
     return (
       <div className="container mx-auto py-4 text-center">
         <h2 className="text-xl font-semibold mb-4">Project not found</h2>
-        <Button onClick={() => setLocation('/projects')}>
+        <Button onClick={() => window.location.href = '/projects'}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Projects
         </Button>
@@ -89,7 +89,7 @@ export default function ProjectLocations() {
   return (
     <div className="container mx-auto py-4">
       <div className="flex items-center mb-4">
-        <Button variant="ghost" onClick={() => setLocation('/projects')} className="mr-2">
+        <Button variant="ghost" onClick={() => window.location.href = '/projects'} className="mr-2">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
         </Button>

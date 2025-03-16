@@ -102,9 +102,9 @@ const AddLocation = () => {
       setShowScanner(false);
     } else {
       if (projectId) {
-        navigate(`/projects/${projectId}`);
+        window.location.href = `/projects/${projectId}`;
       } else {
-        navigate("/");
+        window.location.href = "/";
       }
     }
   };
@@ -366,9 +366,9 @@ const AddLocation = () => {
               // If there's an error, navigate back to list after a short delay
               setTimeout(() => {
                 if (projectId) {
-                  navigate(`/projects/${projectId}`);
+                  window.location.href = `/projects/${projectId}`;
                 } else {
-                  navigate("/");
+                  window.location.href = "/";
                 }
               }, 1500);
             }
@@ -385,9 +385,9 @@ const AddLocation = () => {
           
           setTimeout(() => {
             if (projectId) {
-              navigate(`/projects/${projectId}`);
+              window.location.href = `/projects/${projectId}`;
             } else {
-              navigate("/");
+              window.location.href = "/";
             }
           }, 1000);
         }
@@ -404,9 +404,9 @@ const AddLocation = () => {
       onBack={() => {
         setShowLocationSelector(false);
         if (projectId) {
-          navigate(`/projects/${projectId}`);
+          window.location.href = `/projects/${projectId}`;
         } else {
-          navigate("/");
+          window.location.href = "/";
         }
       }} 
     />;
