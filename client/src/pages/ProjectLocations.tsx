@@ -19,7 +19,8 @@ export default function ProjectLocations() {
   const params = useParams<{ id: string }>();
   const projectId = params.id ? parseInt(params.id, 10) : undefined;
   const [showLocationSelector, setShowLocationSelector] = useState(false);
-
+  const { startTour, hasTakenTour } = useTour();
+  
   const { data: projectData, isLoading: isProjectLoading } = useQuery({
     queryKey: ['/api/projects', projectId],
     queryFn: async () => {
@@ -43,6 +44,17 @@ export default function ProjectLocations() {
   });
   
   const locations: (Location & { barcodes: Barcode[] })[] = locationsData || [];
+  
+  // Check if this is the first time viewing a project's locations
+  useEffect(() => {
+    if (!isLocationsLoading && locations.length > 0 && !hasTakenTour('locations')) {
+      // Start the tour after a slight delay to ensure the UI is fully rendered
+      const timer = setTimeout(() => {
+        startTour('locations');
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLocationsLoading, locations, hasTakenTour, startTour]);
 
   if (!projectId) {
     return (
@@ -95,7 +107,17 @@ export default function ProjectLocations() {
           Back
         </Button>
         <h1 className="text-2xl font-bold">{project.name}</h1>
-        <div className="ml-auto space-x-2">
+        <div className="flex items-center ml-auto space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center" 
+            title="Show Help Tour"
+            onClick={() => startTour('locations')}
+          >
+            <Info className="h-4 w-4 mr-1" />
+            Tour
+          </Button>
           {project.submitted ? (
             <ReopenProjectButton 
               projectId={projectId} 
