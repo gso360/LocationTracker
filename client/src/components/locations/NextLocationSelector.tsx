@@ -178,9 +178,19 @@ const NextLocationSelector = ({ locations, projectId, onBack }: NextLocationSele
             className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm flex items-center justify-between cursor-pointer"
           >
             <div className="flex items-center">
-              <div className="h-10 w-10 rounded-full bg-[#2962FF] text-white flex items-center justify-center mr-3">
-                <MapPin className="h-5 w-5" />
-              </div>
+              {location.imageData ? (
+                <div className="h-10 w-10 rounded-full overflow-hidden mr-3 border border-gray-200">
+                  <img 
+                    src={location.imageData} 
+                    alt={`GroupID ${location.name}`} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-[#2962FF] text-white flex items-center justify-center mr-3">
+                  <MapPin className="h-5 w-5" />
+                </div>
+              )}
               <div>
                 <h3 className="font-medium text-[#263238]">GroupID: {location.name}</h3>
                 <p className="text-sm text-gray-500">
