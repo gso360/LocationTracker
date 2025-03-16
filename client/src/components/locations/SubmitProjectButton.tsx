@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +26,7 @@ const SubmitProjectButton: React.FC<SubmitProjectButtonProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const handleSubmit = async () => {
@@ -48,7 +48,7 @@ const SubmitProjectButton: React.FC<SubmitProjectButtonProps> = ({
       } else {
         // Navigate to the projects list after a short delay
         setTimeout(() => {
-          navigate("/projects");
+          setLocation("/projects");
         }, 1000);
       }
     } catch (error: any) {

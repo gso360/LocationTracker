@@ -3,11 +3,13 @@ import { Link, useParams, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useQuery } from "@tanstack/react-query";
-import { PlusCircle, ArrowLeft } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { PlusCircle, ArrowLeft, CheckCircle, RefreshCcw } from "lucide-react";
 import { type Project, type Location, type Barcode } from "@shared/schema";
 import LocationList from "@/components/locations/LocationList";
 import NextLocationSelector from "@/components/locations/NextLocationSelector";
+import SubmitProjectButton from "@/components/locations/SubmitProjectButton";
+import ReopenProjectButton from "@/components/locations/ReopenProjectButton";
 
 export default function ProjectLocations() {
   const { toast } = useToast();
@@ -91,10 +93,51 @@ export default function ProjectLocations() {
           Back
         </Button>
         <h1 className="text-2xl font-bold">{project.name}</h1>
+        <div className="ml-auto space-x-2">
+          {project.submitted ? (
+            <ReopenProjectButton 
+              projectId={projectId} 
+              onProjectReopened={() => {
+                toast({
+                  title: "Project Reopened",
+                  description: "You can now continue working on this project.",
+                });
+                // Refresh the project data
+                queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId] });
+              }}
+            />
+          ) : (
+            <SubmitProjectButton 
+              projectId={projectId} 
+              onProjectSubmitted={() => {
+                toast({
+                  title: "Project Submitted",
+                  description: "Project has been successfully submitted.",
+                });
+                // Refresh the project data
+                queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId] });
+              }}
+            />
+          )}
+        </div>
       </div>
 
       {project.description && (
         <p className="text-muted-foreground mb-6">{project.description}</p>
+      )}
+      
+      {project.submitted && (
+        <div className="bg-green-50 text-green-800 rounded-md p-4 mb-6 border border-green-200">
+          <div className="flex items-center">
+            <CheckCircle className="h-5 w-5 mr-2" />
+            <div>
+              <p className="font-semibold">This project has been submitted.</p>
+              <p className="text-sm">
+                Submitted on: {new Date(project.submittedAt || '').toLocaleDateString()} at {new Date(project.submittedAt || '').toLocaleTimeString()}
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
       <div className="flex justify-between items-center mb-6">

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -27,7 +27,7 @@ const ReopenProjectButton: React.FC<ReopenProjectButtonProps> = ({
 }) => {
   const [isReopening, setIsReopening] = useState(false);
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const handleReopen = async () => {
