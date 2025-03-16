@@ -10,6 +10,14 @@ import AddLocationForm from "@/components/locations/AddLocationForm";
 import NextLocationSelector from "@/components/locations/NextLocationSelector";
 import { useQuery } from "@tanstack/react-query";
 import type { Location, Barcode } from "@shared/schema";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface LocationParams {
   id?: string;
@@ -18,11 +26,34 @@ interface LocationParams {
 
 const AddLocation = () => {
   const params = useParams<LocationParams>();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Get locationId from URL params
   const locationId = params.id ? parseInt(params.id, 10) : undefined;
-  const projectId = params.projectId ? parseInt(params.projectId, 10) : undefined;
+  
+  // Get projectId from either URL params or query string
+  const getProjectIdFromUrl = () => {
+    // First check path parameters
+    if (params.projectId) {
+      return parseInt(params.projectId, 10);
+    }
+    
+    // Then check query parameters
+    const searchParams = new URLSearchParams(window.location.search);
+    const projectIdParam = searchParams.get('projectId');
+    if (projectIdParam) {
+      return parseInt(projectIdParam, 10);
+    }
+    
+    return undefined;
+  };
+  
+  const projectId = getProjectIdFromUrl();
+  
+  // State to track if we should show the project selection dialog
+  const [showProjectSelection, setShowProjectSelection] = useState<boolean>(!projectId && !locationId);
   
   const [locationName, setLocationName] = useState('');
   const [locationNotes, setLocationNotes] = useState('');
@@ -423,37 +454,86 @@ const AddLocation = () => {
     />;
   }
   
+  // Function to handle project selection
+  const handleProjectSelect = (selectedProjectId: number) => {
+    setShowProjectSelection(false);
+    // Navigate to add location with selected project
+    window.location.href = `/add-location?projectId=${selectedProjectId}`;
+  };
+  
   return (
-    <div className="p-4">
-      <div className="mb-4">
-        <button 
-          onClick={handleBackClick}
-          className="flex items-center text-[#455A64] mb-2"
-        >
-          <ArrowLeft className="h-5 w-5 mr-1" />
-          Back to GroupID List
-        </button>
-        <h2 className="text-xl font-medium text-[#455A64]">
-          {locationId ? 'Edit GroupID' : 'Add New GroupID'}
-        </h2>
+    <>
+      <div className="p-4">
+        <div className="mb-4">
+          <button 
+            onClick={handleBackClick}
+            className="flex items-center text-[#455A64] mb-2"
+          >
+            <ArrowLeft className="h-5 w-5 mr-1" />
+            Back to GroupID List
+          </button>
+          <h2 className="text-xl font-medium text-[#455A64]">
+            {locationId ? 'Edit GroupID' : 'Add New GroupID'}
+          </h2>
+        </div>
+        
+        <AddLocationForm 
+          locationName={locationName}
+          setLocationName={setLocationName}
+          locationNotes={locationNotes}
+          setLocationNotes={setLocationNotes}
+          pinPlacement={pinPlacement}
+          setPinPlacement={setPinPlacement}
+          imageData={imageData}
+          handleCapturePhoto={handleCapturePhoto}
+          barcodes={barcodes}
+          handleRemoveBarcode={handleRemoveBarcode}
+          handleScanBarcode={handleScanBarcode}
+          handleSaveLocation={handleSaveLocation}
+          isSubmitting={isSubmitting}
+        />
       </div>
       
-      <AddLocationForm 
-        locationName={locationName}
-        setLocationName={setLocationName}
-        locationNotes={locationNotes}
-        setLocationNotes={setLocationNotes}
-        pinPlacement={pinPlacement}
-        setPinPlacement={setPinPlacement}
-        imageData={imageData}
-        handleCapturePhoto={handleCapturePhoto}
-        barcodes={barcodes}
-        handleRemoveBarcode={handleRemoveBarcode}
-        handleScanBarcode={handleScanBarcode}
-        handleSaveLocation={handleSaveLocation}
-        isSubmitting={isSubmitting}
-      />
-    </div>
+      {/* Project Selection Dialog */}
+      <Dialog open={showProjectSelection} onOpenChange={setShowProjectSelection}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select Project</DialogTitle>
+            <DialogDescription>
+              Choose a project to add a new GroupID to
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            {projectsData && projectsData.length > 0 ? (
+              projectsData.map((project: any) => (
+                <Button 
+                  key={project.id} 
+                  onClick={() => handleProjectSelect(project.id)}
+                  variant="outline"
+                  className="justify-start h-auto py-3"
+                >
+                  <div className="text-left">
+                    <div className="font-medium">{project.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {project.status === 'in_progress' ? 'In Progress' : 'Completed'}
+                    </div>
+                  </div>
+                </Button>
+              ))
+            ) : (
+              <div className="text-center py-4 text-muted-foreground">
+                No active projects found. Please create a project first.
+              </div>
+            )}
+          </div>
+          
+          <Button variant="outline" onClick={() => window.location.href = "/"}>
+            Go to Home
+          </Button>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
