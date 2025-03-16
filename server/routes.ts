@@ -544,7 +544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Reports endpoints
   
   // Get all reports
-  router.get("/reports", async (req: Request, res: Response) => {
+  router.get("/reports", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const reports = await storage.getReports();
       res.json(reports);
@@ -554,7 +554,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a new report
-  router.post("/reports", async (req: Request, res: Response) => {
+  router.post("/reports", isAuthenticated, async (req: Request, res: Response) => {
     const { data, error } = validateRequest(insertReportSchema, req.body);
     
     if (error) {
@@ -572,12 +572,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Data export endpoints
   
   // Generate Excel/CSV report with barcodes and locations
-  router.get("/exports/excel", async (req: Request, res: Response) => {
+  router.get("/exports/excel", isAuthenticated, async (req: Request, res: Response) => {
     try {
       // Check if a project ID is provided as a query parameter
       const projectId = req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined;
       
       let locations;
+      let projectData = null;
+      
       if (projectId) {
         // Get locations for a specific project
         const project = await storage.getProject(projectId);
@@ -587,6 +589,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             message: "Project not found" 
           });
         }
+        
+        // Store project data for the Excel header
+        projectData = project;
+        
         locations = await storage.getLocationsByProject(projectId);
       } else {
         // Get all locations
@@ -606,7 +612,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         success: true,
-        data: locationsWithBarcodes
+        data: locationsWithBarcodes,
+        projectData: projectData
       });
     } catch (error) {
       res.status(500).json({ 
@@ -617,7 +624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate PDF report with location photos
-  router.get("/exports/pdf", async (req: Request, res: Response) => {
+  router.get("/exports/pdf", isAuthenticated, async (req: Request, res: Response) => {
     try {
       // Check if a project ID is provided as a query parameter
       const projectId = req.query.projectId ? parseInt(req.query.projectId as string, 10) : undefined;

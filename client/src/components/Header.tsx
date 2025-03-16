@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, Link } from "wouter";
-import { Menu, LogOut, User, Shield } from "lucide-react";
+import { Menu, LogOut, User, Shield, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ const Header = () => {
   const [location] = useLocation();
   const isProjectsPage = location === "/" || location === "/projects" || location.startsWith("/projects/");
   const isLocationsPage = location === "/locations" || location === "/add-location" || location.startsWith("/edit-location");
+  const isReportsPage = location === "/reports" || location.startsWith("/projects/") && location.endsWith("/reports");
   const isAdminPage = location === "/admin";
   const { user, isAuthenticated, logout } = useAuth();
   
@@ -80,6 +81,11 @@ const Header = () => {
         <Link href="/locations">
           <div className={`px-4 py-3 font-medium touch-target ${isLocationsPage ? 'text-[#2962FF] border-b-2 border-[#2962FF]' : 'text-gray-500'}`}>
             GroupIDs
+          </div>
+        </Link>
+        <Link href="/reports">
+          <div className={`px-4 py-3 font-medium touch-target flex items-center ${isReportsPage ? 'text-[#2962FF] border-b-2 border-[#2962FF]' : 'text-gray-500'}`}>
+            <FileText className="h-4 w-4 mr-1" /> Reports
           </div>
         </Link>
         {isAdmin && (
