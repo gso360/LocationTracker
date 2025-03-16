@@ -97,8 +97,8 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
             
             <div className="flex-1 flex items-center justify-center">
               <div className="text-white opacity-50 text-center">
-                <Camera className="h-16 w-16 mx-auto mb-4" />
-                <p className="text-lg">Click the button below to take a photo</p>
+                <Camera className="h-10 w-10 mx-auto mb-2" />
+                <p className="text-sm">Click the button below to take a photo</p>
               </div>
             </div>
             
