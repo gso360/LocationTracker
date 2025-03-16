@@ -335,6 +335,10 @@ const AddLocation = () => {
           // Save the location data for reference
           setSavedLocation(savedLocationData);
           
+          // After successfully saving, show the location selector
+          // This will work for both locations with and without barcodes
+          setShowLocationSelector(true);
+          
           // Resolve the promise with the saved location
           resolve(savedLocationData);
         } catch (error) {

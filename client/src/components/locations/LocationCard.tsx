@@ -53,7 +53,9 @@ const LocationCard: React.FC<LocationCardProps> = ({ location }) => {
           <div>
             <h3 className="text-lg font-medium">GroupID #{location.name}</h3>
             <p className="text-sm text-gray-500">
-              {location.barcodes.length} {location.barcodes.length === 1 ? "barcode" : "barcodes"}
+              {location.barcodes.length === 0 
+                ? "No barcodes attached" 
+                : `${location.barcodes.length} ${location.barcodes.length === 1 ? "barcode" : "barcodes"}`}
             </p>
           </div>
           <div className="relative">

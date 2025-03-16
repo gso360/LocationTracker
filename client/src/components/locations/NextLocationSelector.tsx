@@ -184,7 +184,9 @@ const NextLocationSelector = ({ locations, projectId, onBack }: NextLocationSele
               <div>
                 <h3 className="font-medium text-[#263238]">GroupID: {location.name}</h3>
                 <p className="text-sm text-gray-500">
-                  {location.barcodes.length} barcode{location.barcodes.length !== 1 ? 's' : ''} scanned
+                  {location.barcodes.length === 0 
+                    ? "No barcodes attached" 
+                    : `${location.barcodes.length} barcode${location.barcodes.length !== 1 ? 's' : ''} scanned`}
                 </p>
               </div>
             </div>
