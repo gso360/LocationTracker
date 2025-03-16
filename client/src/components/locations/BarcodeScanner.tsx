@@ -13,12 +13,16 @@ const BarcodeScanForm = ({
   onSubmit, 
   onDone, 
   onCancel,
-  existingBarcodes = []
+  existingBarcodes = [],
+  onShowManualEntry,
+  scannedCount = 0
 }: { 
   onSubmit: (value: string) => void, 
   onDone: () => void,
   onCancel: () => void,
-  existingBarcodes?: string[]
+  existingBarcodes?: string[],
+  onShowManualEntry?: () => void,
+  scannedCount?: number
 }) => {
   const [value, setValue] = useState('');
   const [scannedCodes, setScannedCodes] = useState<string[]>([]);
@@ -110,13 +114,16 @@ const BarcodeScanForm = ({
     }
   };
   
+  // Combine all scanned codes for display
+  const totalScannedCount = scannedCount + scannedCodes.length;
+  
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 overflow-y-auto">
-      <div className="bg-white rounded-lg w-full max-w-md mx-4 my-4">
+    <div className="flex-1 overflow-y-auto flex flex-col">
+      <div className="bg-white w-full">
         <div className="p-4 border-b flex justify-between items-center">
           <h3 className="font-medium">Scan Multiple Barcodes</h3>
           <div className="text-sm text-gray-500">
-            {scannedCodes.length} scanned
+            {totalScannedCount} scanned
           </div>
         </div>
         
@@ -143,6 +150,15 @@ const BarcodeScanForm = ({
               Scanned barcodes will appear below. Continue scanning multiple barcodes without interruption.
             </p>
             
+            {/* Manual entry button - appears directly below the scanner input */}
+            <button 
+              type="button"
+              onClick={onShowManualEntry}
+              className="mt-4 bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-lg w-full font-medium flex items-center justify-center"
+            >
+              Manual Entry
+            </button>
+            
             {/* Duplicate warning */}
             {showDuplicateWarning && (
               <div className="mt-2 bg-yellow-50 border border-yellow-200 rounded p-2 text-sm text-yellow-800 flex items-start">
@@ -155,7 +171,7 @@ const BarcodeScanForm = ({
           </div>
           
           {/* Recently scanned barcodes */}
-          {scannedCodes.length > 0 && (
+          {(scannedCodes.length > 0 || totalScannedCount > 0) && (
             <div className="px-4 pb-2">
               <div className="text-sm font-medium text-gray-700 mb-2 flex items-center">
                 <ListChecks className="h-4 w-4 mr-1" />
@@ -293,7 +309,7 @@ const ManualBarcodeEntry = ({
 const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existingBarcodes = [] }) => {
   const [lastScannedBarcode, setLastScannedBarcode] = useState<string | null>(null);
   const [notificationVisible, setNotificationVisible] = useState(false);
-  const [showBarcodeInput, setShowBarcodeInput] = useState(false);
+  const [showBarcodeInput, setShowBarcodeInput] = useState(true); // Start with barcode input shown
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [scannedCount, setScannedCount] = useState(0);
   const { startListening, stopListening } = useBluetoothBarcode();
@@ -349,72 +365,15 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existi
         <h2 className="text-lg font-medium">Scan Barcodes</h2>
       </div>
       
-      <div className="flex-1 relative">
-        <div className="h-full flex flex-col items-center justify-center bg-gray-100 p-4">
-          <div className="bg-white rounded-lg shadow-md p-6 max-w-md w-full text-center">
-            <Bluetooth className="h-16 w-16 text-[#2962FF] mx-auto mb-4" />
-            
-            <h3 className="text-xl font-medium mb-2">Bluetooth Barcode Scanner</h3>
-            
-            <p className="text-gray-600 mb-4">
-              Connect your bluetooth scanner to scan multiple product barcodes in sequence.
-            </p>
-            
-            {/* Recently scanned barcode notification */}
-            {notificationVisible && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-                <div className="flex items-center">
-                  <Check className="h-5 w-5 text-[#00C853] mr-2 flex-shrink-0" />
-                  <div className="text-left">
-                    <p className="font-medium text-green-800">Barcode Scanned</p>
-                    <p className="text-sm text-green-700">{lastScannedBarcode}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            <div className="space-y-3">
-              <button 
-                onClick={() => setShowBarcodeInput(true)}
-                className="bg-[#2962FF] text-white px-4 py-3 rounded-lg w-full font-medium flex items-center justify-center"
-              >
-                <QrCode className="h-5 w-5 mr-2" />
-                Start Scanning Barcodes
-              </button>
-              
-              <button 
-                onClick={() => setShowManualEntry(true)}
-                className="bg-white border border-gray-300 text-gray-800 px-4 py-3 rounded-lg w-full font-medium flex items-center justify-center"
-              >
-                Manual Entry
-              </button>
-            </div>
-            
-            {scannedCount > 0 && (
-              <div className="mt-4 pt-4 border-t">
-                <div className="text-sm text-gray-600 mb-2">
-                  {scannedCount} barcode{scannedCount !== 1 ? 's' : ''} scanned successfully
-                </div>
-                <button
-                  onClick={onClose}
-                  className="text-[#00C853] font-medium"
-                >
-                  Finish Scanning
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      
-      {showBarcodeInput && (
-        <BarcodeScanForm 
-          onSubmit={handleBarcodeEntry}
-          onDone={onClose}
-          onCancel={() => setShowBarcodeInput(false)}
-          existingBarcodes={existingBarcodes}
-        />
-      )}
+      {/* Always show the barcode input form since showBarcodeInput is true by default */}
+      <BarcodeScanForm 
+        onSubmit={handleBarcodeEntry}
+        onDone={onClose}
+        onCancel={() => setShowBarcodeInput(false)}
+        existingBarcodes={existingBarcodes}
+        onShowManualEntry={() => setShowManualEntry(true)}
+        scannedCount={scannedCount}
+      />
       
       {showManualEntry && (
         <ManualBarcodeEntry 
