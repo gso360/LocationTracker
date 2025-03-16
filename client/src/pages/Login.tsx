@@ -44,7 +44,8 @@ export default function Login() {
           description: 'You have been successfully logged in.',
           variant: 'default',
         });
-        navigate('/');
+        // Redirect to the projects page after successful login
+        navigate('/projects');
       } else {
         toast({
           title: 'Login failed',

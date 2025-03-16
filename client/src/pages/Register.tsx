@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Validation schema for registration form
 const registerSchema = z.object({
@@ -26,6 +27,7 @@ export default function Register() {
   const [, navigate] = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { login } = useAuth();
 
   // Initialize form with react-hook-form
   const form = useForm<RegisterFormValues>({
@@ -49,12 +51,20 @@ export default function Register() {
       if (response.ok) {
         toast({
           title: 'Registration successful',
-          description: 'Your account has been created. You can now login.',
+          description: 'Your account has been created.',
           variant: 'default',
         });
         
-        // Redirect to login page
-        navigate('/login');
+        // Automatically log in the user
+        const loginSuccess = await login(data.username, data.password);
+        
+        if (loginSuccess) {
+          // Redirect to projects page after successful login
+          navigate('/projects');
+        } else {
+          // If auto-login fails, redirect to login page
+          navigate('/login');
+        }
       } else {
         const errorData = await response.json();
         toast({
