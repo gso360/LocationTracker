@@ -1,70 +1,73 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import React, { useState } from 'react';
+import { useLocation } from 'wouter';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
-// Registration form validation schema
-const registerSchema = z
-  .object({
-    username: z.string().min(3, "Username must be at least 3 characters"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+// Validation schema for registration form
+const registerSchema = z.object({
+  username: z.string().min(3, 'Username must be at least 3 characters'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(6, 'Password confirmation is required'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function Register() {
   const [, navigate] = useLocation();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  // Initialize form with react-hook-form and zod validation
+  // Initialize form with react-hook-form
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      username: "",
-      password: "",
-      confirmPassword: "",
+      username: '',
+      password: '',
+      confirmPassword: '',
     },
   });
 
-  // Handle form submission
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
-    
     try {
-      // Remove confirmPassword field before sending to API
-      const { confirmPassword, ...registerData } = data;
-      
-      const response = await apiRequest("POST", "/api/auth/register", registerData);
+      // Register the user
+      const response = await apiRequest('POST', '/api/auth/register', {
+        username: data.username,
+        password: data.password
+      });
       
       if (response.ok) {
         toast({
-          title: "Registration successful",
-          description: "Your account has been created. You can now log in.",
+          title: 'Registration successful',
+          description: 'Your account has been created. You can now login.',
+          variant: 'default',
         });
-        navigate("/login");
+        
+        // Redirect to login page
+        navigate('/login');
       } else {
-        // Handle error responses
         const errorData = await response.json();
         toast({
-          title: "Registration failed",
-          description: errorData.message || "Could not create account",
-          variant: "destructive",
+          title: 'Registration failed',
+          description: errorData.message || 'Could not create account. Please try again.',
+          variant: 'destructive',
         });
       }
     } catch (error) {
       toast({
-        title: "Registration error",
-        description: "Could not connect to the server. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'An unexpected error occurred. Please try again later.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -72,97 +75,93 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 bg-gray-50">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-            Create an account
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Register to access inventory management features
-          </p>
-        </div>
-
-        <div className="bg-white p-6 shadow-md rounded-lg">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-2">
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                {...form.register("username")}
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                placeholder="Choose a username"
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+          <CardDescription>Enter your details to create a new account</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Choose a username" 
+                        {...field} 
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {form.formState.errors.username && (
-                <p className="text-sm text-red-600">
-                  {form.formState.errors.username.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                {...form.register("password")}
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                placeholder="Create a password"
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder="Choose a password" 
+                        {...field} 
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {form.formState.errors.password && (
-                <p className="text-sm text-red-600">
-                  {form.formState.errors.password.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                {...form.register("confirmPassword")}
-                className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                placeholder="Confirm your password"
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="password" 
+                        placeholder="Confirm your password" 
+                        {...field} 
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {form.formState.errors.confirmPassword && (
-                <p className="text-sm text-red-600">
-                  {form.formState.errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <button
-                type="submit"
+              <Button 
+                type="submit" 
+                className="w-full" 
                 disabled={isLoading}
-                className="w-full rounded-md bg-[#2962FF] px-4 py-2 text-white font-medium shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {isLoading ? "Registering..." : "Register"}
-              </button>
-            </div>
-          </form>
-
-          <div className="mt-6">
-            <p className="text-center text-sm text-gray-600">
-              Already have an account?{" "}
-              <button
-                onClick={() => navigate("/login")}
-                className="font-medium text-[#2962FF] hover:text-blue-700"
-              >
-                Log in
-              </button>
-            </p>
+                {isLoading ? (
+                  <><span className="mr-2">Creating account</span><div className="animate-spin h-4 w-4 border-2 border-gray-200 border-t-white rounded-full" /></>
+                ) : 'Register'}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+        <CardFooter className="flex flex-col">
+          <div className="text-sm text-gray-500 mt-2">
+            Already have an account?{' '}
+            <Button 
+              variant="link" 
+              className="p-0 h-auto font-normal" 
+              onClick={() => navigate('/login')}
+            >
+              Login here
+            </Button>
           </div>
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

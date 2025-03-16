@@ -112,7 +112,7 @@ export function useAuth() {
 
 // Higher-order component to ensure authentication
 export function withAuth<P>(Component: React.ComponentType<P>) {
-  return function WithAuth(props: P) {
+  const WithAuth = (props: any) => {
     const { isAuthenticated, isLoading } = useAuth();
     const [, navigate] = useLocation();
 
@@ -136,4 +136,6 @@ export function withAuth<P>(Component: React.ComponentType<P>) {
 
     return <Component {...props} />;
   };
+  
+  return WithAuth;
 }
