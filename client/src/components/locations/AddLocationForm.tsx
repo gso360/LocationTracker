@@ -89,8 +89,8 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
       
       {/* Photo Section */}
       {!imageData ? (
-        <div className="fixed inset-0 z-50 bg-black">
-          <div className="h-full flex flex-col">
+        <div className="fixed inset-0 z-50 bg-black min-h-screen">
+          <div className="absolute inset-0 flex flex-col">
             <div className="p-4 flex items-center justify-between bg-black/50">
               <h3 className="font-medium text-white">Capture GroupID Photo</h3>
             </div>
@@ -102,7 +102,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
               </div>
             </div>
             
-            <div className="p-8 flex justify-center">
+            <div className="fixed bottom-8 left-0 right-0 flex justify-center">
               <button 
                 onClick={handleCapturePhoto}
                 className="bg-[#FF6D00] text-white rounded-full w-20 h-20 flex items-center justify-center"
