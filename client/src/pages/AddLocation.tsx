@@ -38,6 +38,8 @@ const AddLocation = () => {
   const [location, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { startTour, hasTakenTour } = useTour();
+  const blueScanner = useBluetoothBarcode();
   
   // Get locationId from URL params
   const locationId = params.id ? parseInt(params.id, 10) : undefined;
@@ -140,6 +142,18 @@ const AddLocation = () => {
       }
     }
   }, [inProgressProjectsData, projectsData, projectId, locationId, toast]);
+  
+  // Effect to start the tour if it's the first time adding a location
+  useEffect(() => {
+    // Check if we're not editing and the user hasn't taken the tour yet
+    if (!locationId && !hasTakenTour('add-location') && projectId) {
+      // Wait for the UI to fully render
+      const timer = setTimeout(() => {
+        startTour('add-location');
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [locationId, hasTakenTour, startTour, projectId]);
   
   // Fetch the next location number if we're adding a new location
   const { data: nextNumberData } = useQuery({
@@ -527,6 +541,17 @@ const AddLocation = () => {
             <h2 className="text-xl font-medium text-[#455A64]">
               {locationId ? 'Edit GroupID' : 'Add New GroupID'}
             </h2>
+            
+            {/* Tour Button */}
+            <Button 
+              variant="ghost"
+              size="sm"
+              className="tour-trigger"
+              onClick={() => startTour('add-location')}
+            >
+              <HelpCircle className="h-5 w-5 mr-1" />
+              Tour
+            </Button>
             
             {/* Project selection dropdown */}
             {!locationId && projectId && (
