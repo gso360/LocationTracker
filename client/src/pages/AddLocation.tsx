@@ -59,8 +59,8 @@ const AddLocation = () => {
   
   const projectId = getProjectIdFromUrl();
   
-  // State to track if we should show the project selection dialog
-  const [showProjectSelection, setShowProjectSelection] = useState<boolean>(!projectId && !locationId);
+  // State to track if we should show the project selection dialog - now we'll only show it if there's no auto-selected project
+  const [showProjectSelection, setShowProjectSelection] = useState<boolean>(false); // Don't show by default
   
   const [locationName, setLocationName] = useState('');
   const [locationNotes, setLocationNotes] = useState('');
@@ -101,30 +101,43 @@ const AddLocation = () => {
   // State for the currently selected project (for dropdown)
   const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>(projectId);
   
-  // Fetch in-progress projects specifically
+  // Fetch in-progress projects specifically (always fetch these for the dropdown)
   const { data: inProgressProjectsData } = useQuery({
     queryKey: ['/api/projects', 'in_progress'],
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/projects?status=in_progress');
       return await response.json();
     },
-    enabled: !projectId && !locationId, // Only fetch if we don't have a project ID and aren't editing
+    enabled: !locationId, // Only avoid fetching if we're editing a location
   });
   
   // Effect to auto-select most recent in-progress project if no project is specified
   useEffect(() => {
-    // Only auto-select if we don't have a project ID and we're not editing a location
-    if (!projectId && !locationId && inProgressProjectsData && inProgressProjectsData.length > 0 && !selectedProjectId) {
-      // Get the most recent in-progress project (the API returns them sorted by lastAccessedAt)
-      const mostRecentProject = inProgressProjectsData[0];
-      setSelectedProjectId(mostRecentProject.id);
-      
-      // Navigate to add location with this project
-      if (!locationId) {
-        window.location.href = `/add-location?projectId=${mostRecentProject.id}`;
+    // Only run this effect if we don't have a project ID and we're not editing a location
+    if (!projectId && !locationId) {
+      if (inProgressProjectsData !== undefined) {
+        if (inProgressProjectsData.length > 0) {
+          // We have in-progress projects - auto select the most recent
+          const mostRecentProject = inProgressProjectsData[0];
+          setSelectedProjectId(mostRecentProject.id);
+          
+          // Navigate to add location with this project
+          window.location.href = `/add-location?projectId=${mostRecentProject.id}`;
+        } else if (projectsData && projectsData.length > 0) {
+          // No in-progress projects but we have projects - show selection
+          setShowProjectSelection(true);
+        } else {
+          // No projects at all - go to home page
+          toast({
+            title: "No projects found",
+            description: "Please create a project first.",
+            variant: "destructive"
+          });
+          setTimeout(() => window.location.href = '/', 1000);
+        }
       }
     }
-  }, [inProgressProjectsData, projectId, locationId, selectedProjectId]);
+  }, [inProgressProjectsData, projectsData, projectId, locationId, toast]);
   
   // Fetch the next location number if we're adding a new location
   const { data: nextNumberData } = useQuery({
@@ -514,7 +527,7 @@ const AddLocation = () => {
             </h2>
             
             {/* Project selection dropdown */}
-            {!locationId && inProgressProjectsData && inProgressProjectsData.length > 0 && (
+            {!locationId && projectId && (
               <div className="w-1/2">
                 <Select
                   value={String(projectId)}
@@ -529,7 +542,7 @@ const AddLocation = () => {
                     <SelectValue placeholder="Select project" />
                   </SelectTrigger>
                   <SelectContent>
-                    {inProgressProjectsData.map((project: Project) => (
+                    {inProgressProjectsData && inProgressProjectsData.map((project: Project) => (
                       <SelectItem key={project.id} value={String(project.id)}>
                         {project.name}
                       </SelectItem>
