@@ -1,4 +1,4 @@
-import { Download, FileText, Table } from "lucide-react";
+import { FileText, Table } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Report } from "@shared/schema";
 import { formatDate } from "@/lib/utils";
@@ -14,14 +14,6 @@ const ReportsList: React.FC<ReportsListProps> = ({ reports }) => {
   const { toast } = useToast();
   const [loadingStates, setLoadingStates] = useState<Record<number, { excel: boolean, pdf: boolean }>>({});
   
-  const handleDownload = (report: Report) => {
-    // In a real application, this would download the saved report
-    // For this MVP, we'll just show a toast
-    toast({
-      title: "Download not available",
-      description: "In this MVP, reports are not stored. Please generate a new report.",
-    });
-  };
   
   const generateExcel = async (report: Report) => {
     // Set loading state for this report's Excel button
@@ -142,14 +134,6 @@ const ReportsList: React.FC<ReportsListProps> = ({ reports }) => {
                 ) : (
                   <FileText className="h-5 w-5" />
                 )}
-              </button>
-              
-              {/* Original Download Button */}
-              <button 
-                onClick={() => handleDownload(report)}
-                className="text-[#2962FF]"
-              >
-                <Download className="h-5 w-5" />
               </button>
             </div>
           </div>
