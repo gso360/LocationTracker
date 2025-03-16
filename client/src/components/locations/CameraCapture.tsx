@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X, Camera } from "lucide-react";
 import Webcam from "react-webcam";
+import { CapacitorCameraService } from "../../services/CapacitorCameraService";
 
 interface CameraCaptureProps {
   onCapture: (imageData: string) => void;
@@ -12,8 +13,23 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [isNative, setIsNative] = useState<boolean>(false);
   
+  // Check if running in a native Capacitor environment
   useEffect(() => {
+    const checkNativeEnvironment = () => {
+      if (CapacitorCameraService.isNative()) {
+        setIsNative(true);
+      }
+    };
+    
+    checkNativeEnvironment();
+  }, []);
+  
+  // Setup web camera if not in native environment
+  useEffect(() => {
+    if (isNative) return; // Skip for native app
+    
     const getDevices = async () => {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -37,9 +53,21 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
     };
     
     getDevices();
-  }, []);
+  }, [isNative]);
   
-  const handleCapture = () => {
+  // Use native Capacitor camera if available
+  const handleNativeCapture = async () => {
+    try {
+      const imageData = await CapacitorCameraService.takePhoto();
+      onCapture(imageData);
+    } catch (err) {
+      console.error("Error taking photo with native camera:", err);
+      setError("Failed to capture photo. Please try again.");
+    }
+  };
+  
+  // Use web camera
+  const handleWebCapture = () => {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc) {
@@ -54,6 +82,15 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
             onCapture(imageSrc);
           });
       }
+    }
+  };
+  
+  // Choose the appropriate capture method based on environment
+  const handleCapture = () => {
+    if (isNative) {
+      handleNativeCapture();
+    } else {
+      handleWebCapture();
     }
   };
   
@@ -140,7 +177,28 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
               </button>
             </div>
           </div>
+        ) : isNative ? (
+          // Native Camera Interface
+          <div className="flex flex-col items-center justify-center h-full w-full">
+            <div className="text-white text-center mb-8 px-4">
+              <p className="text-lg">Using Native Camera</p>
+              <p className="text-sm mt-1 opacity-70">The system camera will open when you tap the button</p>
+            </div>
+            
+            <div className="mt-4 w-32 h-32 rounded-full bg-gray-800 flex items-center justify-center mb-6">
+              <Camera className="h-16 w-16 text-gray-400" />
+            </div>
+            
+            <button 
+              onClick={handleCapture}
+              className="bg-white rounded-lg w-2/3 py-4 flex items-center justify-center shadow-lg"
+            >
+              <Camera className="h-5 w-5 text-black mr-2" />
+              <span className="text-black font-medium">Take Photo</span>
+            </button>
+          </div>
         ) : (
+          // Web Camera Interface
           <>
             {/* Instructions */}
             <div className="text-white text-center mb-2 px-4">
