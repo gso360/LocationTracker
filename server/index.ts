@@ -35,8 +35,7 @@ app.use(
     },
     store: new MemoryStoreSession({
       checkPeriod: 86400000, // 24 hours
-      // Save sessions to disk to persist between server restarts
-      path: sessionsDir,
+      // Sessions will persist for 7 days
       ttl: 7 * 24 * 60 * 60 * 1000, // 7 days
     }),
   })
