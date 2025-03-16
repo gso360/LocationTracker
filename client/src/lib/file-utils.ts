@@ -82,7 +82,7 @@ export const generateExcelReport = async (
   const url = URL.createObjectURL(blob);
   
   // Create download element
-  const filename = `inventory_report_${getFileName(projectData)}.xlsx`;
+  const filename = `GroupID_${getFileName(projectData)}.xlsx`;
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;
@@ -248,7 +248,7 @@ export const generatePDFReport = async (
   }
   
   // Generate a filename with showroom name, date, and scanner name
-  const filename = `showroom_location_report_${getFileName(projectData)}.pdf`;
+  const filename = `GroupID_${getFileName(projectData)}.pdf`;
   doc.save(filename);
   
   return filename;
