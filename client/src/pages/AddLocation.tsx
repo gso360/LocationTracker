@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "wouter";
-import { ArrowLeft, Camera, ChevronDown, HelpCircle } from "lucide-react";
+import { ArrowLeft, Camera, ChevronDown, HelpCircle, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -547,9 +547,9 @@ const AddLocation = () => {
               variant="ghost"
               size="sm"
               className="tour-trigger"
-              onClick={() => startTour('add-location')}
+              onClick={() => startTour('add-location-detail')}
             >
-              <HelpCircle className="h-5 w-5 mr-1" />
+              <Info className="h-5 w-5 mr-1" />
               Tour
             </Button>
             
