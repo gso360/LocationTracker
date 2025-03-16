@@ -43,13 +43,13 @@ export default function AdminPage() {
   }
 
   // Query all users
-  const { data: users = [], isLoading } = useQuery({
+  const { data: users = [], isLoading } = useQuery<SafeUser[]>({
     queryKey: ['/api/admin/users'],
     enabled: isAdmin
   });
 
   // Query for pending users
-  const { data: pendingUsers = [] } = useQuery({
+  const { data: pendingUsers = [] } = useQuery<SafeUser[]>({
     queryKey: ['/api/admin/users/pending'],
     enabled: isAdmin
   });

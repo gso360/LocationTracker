@@ -5,7 +5,12 @@
       {
         "username": "glennsheridan",
         "password": "$2b$10$k2PpwNx41XL8Pot2p/XDU.273IpSuqbq6xssrlsBq7k5IZVbPNj4K",
-        "id": 1
+        "id": 1,
+        "role": "superadmin",
+        "approved": true,
+        "createdAt": "2025-03-16T12:00:00.000Z",
+        "approvedAt": "2025-03-16T12:00:00.000Z",
+        "approvedBy": null
       }
     ]
   ],

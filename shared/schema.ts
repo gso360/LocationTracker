@@ -10,7 +10,7 @@ export const users = pgTable("users", {
   approved: boolean("approved").default(false).notNull(), // Whether the user is approved to access the system
   createdAt: timestamp("created_at").defaultNow().notNull(),
   approvedAt: timestamp("approved_at"), // When the user was approved
-  approvedBy: integer("approved_by").references(() => users.id), // Who approved the user
+  approvedBy: integer("approved_by"), // Who approved the user
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({

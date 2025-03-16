@@ -99,13 +99,16 @@ export async function register(req: Request, res: Response) {
     const allUsers = await storage.getAllUsers();
     const isFirstUser = allUsers.length === 0;
     
-    // Create user
-    const user = await storage.createUser({
-      ...validatedData,
+    // Prepare user data
+    const userData: InsertUser = {
+      username: validatedData.username,
       password: hashedPassword,
       role: isFirstUser ? 'superadmin' : (validatedData.role || 'user'),
       approved: isFirstUser, // First user is automatically approved
-    });
+    };
+    
+    // Create user
+    const user = await storage.createUser(userData);
     
     // Return user without password
     const { password: _, ...userWithoutPassword } = user;
