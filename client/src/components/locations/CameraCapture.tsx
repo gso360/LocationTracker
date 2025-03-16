@@ -127,7 +127,7 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
         <h2 className="text-lg font-medium">Take Photo</h2>
       </div>
       
-      <div className="relative flex-1 bg-black">
+      <div className="relative flex-1 bg-black flex flex-col items-center justify-center">
         {error ? (
           <div className="h-full flex items-center justify-center text-white">
             <div className="text-center p-4">
@@ -142,16 +142,31 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
           </div>
         ) : (
           <>
-            <Webcam
-              audio={false}
-              ref={webcamRef}
-              screenshotFormat="image/jpeg"
-              className="w-full h-full object-cover"
-              videoConstraints={videoConstraints}
-            />
+            {/* Instructions */}
+            <div className="text-white text-center mb-2 px-4">
+              <p>Position the item within the frame</p>
+            </div>
+            
+            {/* Camera container with viewfinder overlay */}
+            <div className="relative w-full max-w-md aspect-[3/4] mx-auto">
+              {/* Camera feed */}
+              <Webcam
+                audio={false}
+                ref={webcamRef}
+                screenshotFormat="image/jpeg"
+                className="w-full h-full object-cover rounded-lg"
+                videoConstraints={videoConstraints}
+              />
+              
+              {/* Viewfinder corners */}
+              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white opacity-70"></div>
+              <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white opacity-70"></div>
+              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white opacity-70"></div>
+              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white opacity-70"></div>
+            </div>
             
             {devices.length > 1 && !isMobileIOS && (
-              <div className="absolute top-4 right-4 bg-black bg-opacity-50 p-2 rounded">
+              <div className="mt-2 bg-black bg-opacity-50 p-2 rounded">
                 <select 
                   value={selectedDeviceId}
                   onChange={handleDeviceChange}
@@ -166,10 +181,10 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture, onCancel }) =>
               </div>
             )}
             
-            <div className="absolute bottom-0 left-0 right-0 p-6 flex justify-center">
+            <div className="mt-6 flex justify-center">
               <button 
                 onClick={handleCapture}
-                className="bg-white rounded-full w-16 h-16 flex items-center justify-center"
+                className="bg-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg"
               >
                 <Camera className="h-8 w-8 text-black" />
               </button>
