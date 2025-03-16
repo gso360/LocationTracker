@@ -5,7 +5,8 @@ import {
   insertLocationSchema, 
   insertBarcodeSchema, 
   insertReportSchema,
-  insertProjectSchema
+  insertProjectSchema,
+  User
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -56,17 +57,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Projects endpoints
   
   // Get all projects
-  router.get("/projects", async (req: Request, res: Response) => {
+  router.get("/projects", isAuthenticated, async (req: Request, res: Response) => {
     try {
+      const user = req.user as User;
       const status = req.query.status as string;
-      if (status === 'in_progress') {
-        // Return only in-progress projects, sorted by most recently accessed
-        const inProgressProjects = await storage.getInProgressProjects();
-        res.json(inProgressProjects);
+      
+      // Super admins can see all projects
+      if (user.role === 'superadmin') {
+        if (status === 'in_progress') {
+          // Return only in-progress projects, sorted by most recently accessed
+          const inProgressProjects = await storage.getInProgressProjects();
+          res.json(inProgressProjects);
+        } else {
+          // Return all projects, sorted by most recently accessed
+          const projects = await storage.getProjects();
+          res.json(projects);
+        }
       } else {
-        // Return all projects, sorted by most recently accessed
-        const projects = await storage.getProjects();
-        res.json(projects);
+        // Regular users and admins get all projects for now
+        // In a future update, we could filter by user ID if needed
+        if (status === 'in_progress') {
+          const inProgressProjects = await storage.getInProgressProjects();
+          res.json(inProgressProjects);
+        } else {
+          const projects = await storage.getProjects();
+          res.json(projects);
+        }
       }
     } catch (error) {
       res.status(500).json({ message: "Failed to retrieve projects" });
@@ -74,14 +90,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get a single project
-  router.get("/projects/:id", async (req: Request, res: Response) => {
+  router.get("/projects/:id", isAuthenticated, async (req: Request, res: Response) => {
     try {
+      const user = req.user as User;
       const id = parseInt(req.params.id, 10);
       const project = await storage.getProject(id);
       
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
       }
+      
+      // Super admins can access any project
+      // In a future update, we could add project ownership and restrict access
+      // to only the owner and super admins
       
       res.json(project);
     } catch (error) {
@@ -90,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a new project
-  router.post("/projects", async (req: Request, res: Response) => {
+  router.post("/projects", isAuthenticated, async (req: Request, res: Response) => {
     const { data, error } = validateRequest(insertProjectSchema, req.body);
     
     if (error) {
@@ -98,6 +119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
+      // In the future, we could associate the project with the user here
       const newProject = await storage.createProject(data);
       res.status(201).json(newProject);
     } catch (error) {

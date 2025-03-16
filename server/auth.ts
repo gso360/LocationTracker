@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { Strategy as LocalStrategy } from 'passport-local';
 import passport from 'passport';
 import { storage } from './storage';
-import { insertUserSchema, User } from '@shared/schema';
+import { insertUserSchema, User, InsertUser } from '@shared/schema';
 import { ZodError } from 'zod';
 import { fromZodError } from 'zod-validation-error';
 import bcrypt from 'bcryptjs';
