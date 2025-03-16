@@ -96,7 +96,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
           
           <button 
             onClick={handleCapturePhoto}
-            className="w-full py-8 bg-gray-900 flex items-center justify-center hover:bg-gray-800 transition-colors"
+            className="w-full py-8 bg-gray-900 flex items-center justify-center hover:bg-gray-800 transition-colors photo-capture-button"
           >
             <div className="text-white opacity-50 text-center">
               <Camera className="h-8 w-8 mx-auto mb-1" />
@@ -165,7 +165,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
         <div className="p-4 border-t">
           <button 
             onClick={handleScanBarcode}
-            className="bg-[#2962FF] text-white px-4 py-2 rounded-lg w-full flex items-center justify-center"
+            className="bg-[#2962FF] text-white px-4 py-2 rounded-lg w-full flex items-center justify-center scan-button"
           >
             <QrCode className="h-4 w-4 mr-1" />
             Scan Product Barcode
@@ -178,7 +178,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
         <button 
           onClick={handleSaveLocation}
           disabled={isSubmitting}
-          className="bg-[#00C853] text-white px-6 py-3 rounded-lg w-full font-medium disabled:opacity-70"
+          className="bg-[#00C853] text-white px-6 py-3 rounded-lg w-full font-medium disabled:opacity-70 save-location-button"
         >
           {isSubmitting ? (
             <>

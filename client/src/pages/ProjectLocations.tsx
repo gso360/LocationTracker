@@ -176,7 +176,10 @@ export default function ProjectLocations() {
               Select Next GroupID
             </Button>
           )}
-          <Button onClick={() => window.location.href = `/projects/${projectId}/add-location`}>
+          <Button 
+            onClick={() => window.location.href = `/projects/${projectId}/add-location`}
+            className="add-location-button"
+          >
             <PlusCircle className="mr-2 h-4 w-4" />
             Add New GroupID
           </Button>

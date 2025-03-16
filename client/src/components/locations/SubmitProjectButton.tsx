@@ -72,7 +72,7 @@ const SubmitProjectButton: React.FC<SubmitProjectButtonProps> = ({
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button 
-          className="w-full md:w-auto" 
+          className="w-full md:w-auto submit-project-button" 
           variant="default" 
           disabled={isSubmitting}
         >
