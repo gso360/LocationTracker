@@ -42,7 +42,7 @@ export default function Projects() {
       return await response.json();
     }
   });
-  
+
   const projects: Project[] = data || [];
 
   // Handle creating a new project
@@ -55,7 +55,7 @@ export default function Projects() {
       });
       return;
     }
-    
+
     if (!scannerName.trim()) {
       toast({
         title: "Error",
@@ -91,7 +91,7 @@ export default function Projects() {
       setGroupIdType("1-400");
       setProjectDescription("");
       setIsCreateDialogOpen(false);
-      
+
       // Refresh projects list
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
     } catch (error) {
@@ -120,7 +120,7 @@ export default function Projects() {
 
       setIsDeleteDialogOpen(false);
       setSelectedProject(null);
-      
+
       // Refresh projects list
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
     } catch (error) {
@@ -133,19 +133,19 @@ export default function Projects() {
       setIsSubmitting(false);
     }
   };
-  
+
   // Handle toggling project status
   const handleToggleStatus = async (projectId: number, currentStatus: string) => {
     try {
       await apiRequest('PATCH', `/api/projects/${projectId}/toggle-status`);
-      
+
       const newStatus = currentStatus === 'completed' ? 'in_progress' : 'completed';
-      
+
       toast({
         title: "Status Updated",
         description: `Project marked as ${newStatus === 'completed' ? 'completed' : 'in progress'}`
       });
-      
+
       // Refresh projects list
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
     } catch (error) {
@@ -260,14 +260,16 @@ export default function Projects() {
                   >
                     Create GroupIDs
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => setLocation(`/projects/${project.id}/reports`)}
-                  >
-                    <FileText className="h-4 w-4 mr-1" />
-                    View Reports
-                  </Button>
+                  {project.status === 'completed' && (
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => setLocation(`/projects/${project.id}/reports`)}
+                    >
+                      <FileText className="h-4 w-4 mr-1" />
+                      View Reports
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -299,7 +301,7 @@ export default function Projects() {
                 placeholder="Enter showroom name"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="line-vendor">Line/Vendor</Label>
               <Input 
@@ -309,7 +311,7 @@ export default function Projects() {
                 placeholder="Enter line or vendor name"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="scanner-name">Scanner's Name (First and Last)</Label>
               <Input 
@@ -319,7 +321,7 @@ export default function Projects() {
                 placeholder="Enter your full name"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="tour-id">Tour ID (Market, Season, Year)</Label>
               <Input 
@@ -329,7 +331,7 @@ export default function Projects() {
                 placeholder="e.g., Fall 2025"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="scan-date">Date</Label>
               <Input 
@@ -339,7 +341,7 @@ export default function Projects() {
                 onChange={(e) => setScanDate(e.target.value)}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="group-id-type">GroupID Prefix</Label>
               <Input
@@ -349,7 +351,7 @@ export default function Projects() {
                 placeholder="S25- for example"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="project-description">Additional Notes (Optional)</Label>
               <Textarea 
@@ -381,11 +383,11 @@ export default function Projects() {
                     if (!projectName.trim()) {
                       throw new Error("Showroom name is required");
                     }
-                    
+
                     if (!scannerName.trim()) {
                       throw new Error("Scanner's name is required");
                     }
-                    
+
                     await apiRequest('PATCH', `/api/projects/${selectedProject.id}`, {
                       name: projectName,
                       lineVendor: lineVendor || null,
@@ -403,7 +405,7 @@ export default function Projects() {
 
                     setIsCreateDialogOpen(false);
                     setSelectedProject(null);
-                    
+
                     // Reset form fields
                     setProjectName("");
                     setLineVendor("");
@@ -412,7 +414,7 @@ export default function Projects() {
                     setScanDate("");
                     setGroupIdType("1-400");
                     setProjectDescription("");
-                    
+
                     // Refresh projects list
                     queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
                   } catch (error) {

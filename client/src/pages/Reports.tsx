@@ -27,6 +27,15 @@ const Reports = () => {
         try {
           const response = await apiRequest('GET', `/api/projects/${projectId}`);
           const projectData = await response.json();
+          if (projectData.status !== 'completed') {
+            setLocation('/');
+            toast({
+              title: "Access Denied",
+              description: "Reports are only available for submitted projects",
+              variant: "destructive"
+            });
+            return;
+          }
           setProjectData(projectData);
         } catch (err) {
           toast({
