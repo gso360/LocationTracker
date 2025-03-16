@@ -582,8 +582,8 @@ const AddLocation = () => {
           </DialogHeader>
           
           <div className="grid gap-4 py-4">
-            {projectsData && projectsData.length > 0 ? (
-              projectsData.map((project: any) => (
+            {inProgressProjectsData && inProgressProjectsData.length > 0 ? (
+              inProgressProjectsData.map((project: any) => (
                 <Button 
                   key={project.id} 
                   onClick={() => handleProjectSelect(project.id)}
@@ -593,7 +593,7 @@ const AddLocation = () => {
                   <div className="text-left">
                     <div className="font-medium">{project.name}</div>
                     <div className="text-sm text-muted-foreground">
-                      {project.status === 'in_progress' ? 'In Progress' : 'Completed'}
+                      In Progress
                     </div>
                   </div>
                 </Button>
