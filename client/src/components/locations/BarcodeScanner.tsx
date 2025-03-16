@@ -344,9 +344,18 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existi
   }, [existingBarcodes, onScan]);
   
   // Start listening when in barcode scanning mode
+  // Using a ref to store the handler to prevent infinite loop with useEffect
+  const handleBarcodeEntryRef = useRef(handleBarcodeEntry);
+  
+  // Update the ref value when the callback changes
+  useEffect(() => {
+    handleBarcodeEntryRef.current = handleBarcodeEntry;
+  }, [handleBarcodeEntry]);
+  
   useEffect(() => {
     if (showBarcodeInput) {
-      startListening(handleBarcodeEntry);
+      // Use the ref's current value instead of the callback directly
+      startListening((barcode: string) => handleBarcodeEntryRef.current(barcode));
     } else {
       stopListening();
     }
@@ -354,7 +363,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existi
     return () => {
       stopListening();
     };
-  }, [showBarcodeInput, startListening, stopListening, handleBarcodeEntry]);
+  }, [showBarcodeInput, startListening, stopListening]);
   
   return (
     <div className="h-full flex flex-col">

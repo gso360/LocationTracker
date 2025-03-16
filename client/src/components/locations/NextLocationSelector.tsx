@@ -58,14 +58,8 @@ const NextLocationSelector = ({ locations, projectId, onBack }: NextLocationSele
     
     // Count total barcodes
     const totalBarcodes = locations.reduce((total, location) => total + location.barcodes.length, 0);
-    if (totalBarcodes === 0) {
-      toast({
-        title: "No barcodes scanned",
-        description: "You must scan at least one barcode before submitting.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // We now allow project submission even if there are locations without barcodes
+    // This comment indicates we've removed the check that required at least one barcode
     
     setIsSubmitting(true);
     

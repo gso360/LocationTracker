@@ -378,8 +378,9 @@ const AddLocation = () => {
         // First mark the scanner as closed to prevent re-renders
         setShowScanner(false);
         
-        // Only proceed with save if we have barcodes and a valid GroupID name
-        if (barcodes.length > 0 && locationName.trim()) {
+        // Proceed with save if we have a valid GroupID name
+        // Note: We now allow locations without barcodes
+        if (locationName.trim()) {
           toast({
             title: "Saving GroupID...",
             description: "Please wait while we save your data.",
