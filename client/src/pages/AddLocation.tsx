@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "wouter";
-import { ArrowLeft, Camera } from "lucide-react";
+import { ArrowLeft, Camera, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -9,7 +9,7 @@ import BarcodeScanner from "@/components/locations/BarcodeScanner";
 import AddLocationForm from "@/components/locations/AddLocationForm";
 import NextLocationSelector from "@/components/locations/NextLocationSelector";
 import { useQuery } from "@tanstack/react-query";
-import type { Location, Barcode } from "@shared/schema";
+import type { Location, Barcode, Project } from "@shared/schema";
 import { 
   Dialog,
   DialogContent,
@@ -18,6 +18,13 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface LocationParams {
   id?: string;
@@ -80,15 +87,36 @@ const AddLocation = () => {
     }
   });
   
-  // Check if projects exist to show project selection if needed
+  // Fetch all projects for selection
   const { data: projectsData } = useQuery({
     queryKey: ['/api/projects'],
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/projects');
       return await response.json();
-    },
-    enabled: !projectId && !locationId, // Only fetch if we don't have a project ID and aren't editing
+    }
   });
+  
+  // Separate in-progress projects for selection
+  const inProgressProjects = projectsData?.filter((project: Project) => project.status === 'in_progress') || [];
+  
+  // State for the currently selected project (for dropdown)
+  const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>(projectId);
+  
+  // Effect to auto-select most recent in-progress project if no project is specified
+  useEffect(() => {
+    // Only auto-select if we don't have a project ID and we're not editing a location
+    if (!projectId && !locationId && inProgressProjects.length > 0 && !selectedProjectId) {
+      // Get the most recent in-progress project
+      // Assuming projects are sorted with most recent first, or we could sort by lastAccessedAt if available
+      const mostRecentProject = inProgressProjects[0];
+      setSelectedProjectId(mostRecentProject.id);
+      
+      // Navigate to add location with this project
+      if (!locationId) {
+        window.location.href = `/add-location?projectId=${mostRecentProject.id}`;
+      }
+    }
+  }, [inProgressProjects, projectId, locationId, selectedProjectId]);
   
   // Fetch the next location number if we're adding a new location
   const { data: nextNumberData } = useQuery({
@@ -472,9 +500,37 @@ const AddLocation = () => {
             <ArrowLeft className="h-5 w-5 mr-1" />
             Back to GroupID List
           </button>
-          <h2 className="text-xl font-medium text-[#455A64]">
-            {locationId ? 'Edit GroupID' : 'Add New GroupID'}
-          </h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-medium text-[#455A64]">
+              {locationId ? 'Edit GroupID' : 'Add New GroupID'}
+            </h2>
+            
+            {/* Project selection dropdown */}
+            {!locationId && inProgressProjects.length > 0 && (
+              <div className="w-1/2">
+                <Select
+                  value={String(projectId)}
+                  onValueChange={(value) => {
+                    const newProjectId = parseInt(value, 10);
+                    if (newProjectId !== projectId) {
+                      window.location.href = `/add-location?projectId=${newProjectId}`;
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {inProgressProjects.map((project: Project) => (
+                      <SelectItem key={project.id} value={String(project.id)}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
         </div>
         
         <AddLocationForm 

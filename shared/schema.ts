@@ -29,6 +29,7 @@ export const projects = pgTable("projects", {
   status: text("status").default('in_progress').notNull(), // Project status: in_progress, completed
   submitted: boolean("submitted").default(false).notNull(), // Whether project has been submitted
   submittedAt: timestamp("submitted_at"),  // When the project was submitted
+  lastAccessedAt: timestamp("last_accessed_at"), // When the project was last accessed
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -43,6 +44,7 @@ export const insertProjectSchema = createInsertSchema(projects).pick({
   status: true,
   submitted: true,
   submittedAt: true,
+  lastAccessedAt: true,
 });
 
 export type InsertProject = z.infer<typeof insertProjectSchema>;
