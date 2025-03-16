@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusCircle, ArrowLeft, CheckCircle, RefreshCcw } from "lucide-react";
+import { PlusCircle, ArrowLeft, CheckCircle, RefreshCcw, Info } from "lucide-react";
 import { type Project, type Location, type Barcode } from "@shared/schema";
 import LocationList from "@/components/locations/LocationList";
 import NextLocationSelector from "@/components/locations/NextLocationSelector";
 import SubmitProjectButton from "@/components/locations/SubmitProjectButton";
 import ReopenProjectButton from "@/components/locations/ReopenProjectButton";
+import { useTour } from "@/contexts/TourContext";
 
 export default function ProjectLocations() {
   const { toast } = useToast();

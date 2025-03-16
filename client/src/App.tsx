@@ -13,6 +13,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MobileQRCode from "./components/MobileQRCode";
 import BluetoothBarcodeProvider from "./components/locations/BluetoothBarcodeManager";
+import WelcomeTour from "./components/WelcomeTour";
 import { AuthProvider, useAuth, withAuth } from "./contexts/AuthContext";
 import { TourProvider } from "./contexts/TourContext";
 import "./styles/tour.css";
@@ -71,6 +72,7 @@ function App() {
             <AppLayout>
               <Router />
             </AppLayout>
+            <WelcomeTour />
             <Toaster />
             <div id="mobile-qr">
               <MobileQRCode />

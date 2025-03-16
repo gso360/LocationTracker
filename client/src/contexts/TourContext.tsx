@@ -153,6 +153,92 @@ const TourManager: React.FC = () => {
 
 // Tour configurations
 const tourConfigs: TourConfig = {
+  'welcome': {
+    defaultStepOptions: {
+      classes: 'shepherd-theme-custom',
+      scrollTo: true,
+      cancelIcon: {
+        enabled: true
+      },
+      modalOverlayOpeningRadius: 10
+    },
+    exitOnEsc: true,
+    useModalOverlay: true,
+    steps: [
+      {
+        id: 'app-welcome',
+        title: 'Welcome to the Inventory App! 👋',
+        text: 'This guided tour will help you get started with our powerful inventory management system. Follow along to learn how to create projects, add locations, and scan barcodes.',
+        buttons: [
+          {
+            text: 'Skip Tour',
+            type: 'cancel',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Start Tour',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      },
+      {
+        id: 'app-overview',
+        title: 'App Overview',
+        text: 'The app helps you manage showroom inventory efficiently. You\'ll create projects for different showrooms, add locations within each project, and scan barcodes to track inventory items.',
+        buttons: [
+          {
+            text: 'Back',
+            type: 'back',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Next',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      },
+      {
+        id: 'navigation',
+        title: 'Navigation',
+        text: 'Use the navigation menu to access your projects, locations, and reports. The + button is your quick action for adding new items.',
+        attachTo: {
+          element: 'nav',
+          on: 'bottom'
+        },
+        buttons: [
+          {
+            text: 'Back',
+            type: 'back',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Next',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      },
+      {
+        id: 'lets-start',
+        title: 'Let\'s Get Started!',
+        text: 'Now let\'s create your first project and learn how to use the app\'s features.',
+        buttons: [
+          {
+            text: 'Back',
+            type: 'back',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Continue',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      }
+    ]
+  },
   'projects': {
     defaultStepOptions: {
       classes: 'shepherd-theme-custom',
@@ -166,9 +252,9 @@ const tourConfigs: TourConfig = {
     useModalOverlay: true,
     steps: [
       {
-        id: 'welcome',
-        title: 'Welcome to the Inventory App!',
-        text: 'This quick tour will show you how to use the application to manage your showroom inventory.',
+        id: 'projects-intro',
+        title: 'Projects Dashboard',
+        text: 'This is your projects dashboard where you can manage all your showroom inventory projects.',
         buttons: [
           {
             text: 'Skip',
@@ -185,7 +271,7 @@ const tourConfigs: TourConfig = {
       {
         id: 'create-project',
         title: 'Create a Project',
-        text: 'Start by creating a new project for your showroom inventory.',
+        text: 'Click here to create a new project for your showroom inventory. Each project represents a different showroom or inventory collection.',
         attachTo: {
           element: '.create-project-button',
           on: 'bottom'
@@ -207,7 +293,7 @@ const tourConfigs: TourConfig = {
       {
         id: 'project-list',
         title: 'Your Projects',
-        text: 'Here you can see all your existing projects and their status.',
+        text: 'Here you can see all your existing projects and their status. Projects can be "In Progress" or "Completed".',
         attachTo: {
           element: '.projects-list',
           on: 'top'
@@ -240,7 +326,24 @@ const tourConfigs: TourConfig = {
             classes: 'shepherd-button-secondary'
           },
           {
-            text: 'Finish',
+            text: 'Next',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      },
+      {
+        id: 'project-completion',
+        title: 'Project Workflow',
+        text: 'The typical workflow is: 1) Create a project, 2) Add locations/GroupIDs, 3) Scan barcodes for each location, 4) Submit your project when complete.',
+        buttons: [
+          {
+            text: 'Back',
+            type: 'back',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Finish Tour',
             type: 'next',
             classes: 'shepherd-button-primary'
           }
@@ -261,11 +364,11 @@ const tourConfigs: TourConfig = {
     steps: [
       {
         id: 'locations-welcome',
-        title: 'Manage Locations',
-        text: 'This is where you can add and manage locations (GroupIDs) for your project.',
+        title: 'GroupID Management',
+        text: 'This is where you can see and manage all GroupIDs (locations) for your project. Each GroupID represents a specific location in your showroom.',
         buttons: [
           {
-            text: 'Skip',
+            text: 'Skip Tour',
             type: 'cancel',
             classes: 'shepherd-button-secondary'
           },
@@ -278,8 +381,8 @@ const tourConfigs: TourConfig = {
       },
       {
         id: 'add-location',
-        title: 'Add a Location',
-        text: 'Click here to add a new location to your project.',
+        title: 'Add a GroupID',
+        text: 'Click here to add a new GroupID to your project. Each GroupID should correspond to a physical location in your showroom.',
         attachTo: {
           element: '.add-location-button',
           on: 'bottom'
@@ -291,7 +394,163 @@ const tourConfigs: TourConfig = {
             classes: 'shepherd-button-secondary'
           },
           {
-            text: 'Finish',
+            text: 'Next',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      },
+      {
+        id: 'location-cards',
+        title: 'GroupID Cards',
+        text: 'Each card represents a location you\'ve added. You can see the location name, photo, and how many barcodes have been scanned.',
+        attachTo: {
+          element: '.location-list',
+          on: 'top'
+        },
+        buttons: [
+          {
+            text: 'Back',
+            type: 'back',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Next',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      },
+      {
+        id: 'submit-project',
+        title: 'Submit Project',
+        text: 'When you\'ve added all GroupIDs and scanned all barcodes, you can submit your project for reporting and analysis.',
+        attachTo: {
+          element: '.submit-project-button',
+          on: 'bottom'
+        },
+        buttons: [
+          {
+            text: 'Back',
+            type: 'back',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Finish Tour',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      }
+    ]
+  },
+  'add-location': {
+    defaultStepOptions: {
+      classes: 'shepherd-theme-custom',
+      scrollTo: true,
+      cancelIcon: {
+        enabled: true
+      }
+    },
+    exitOnEsc: true,
+    useModalOverlay: true,
+    steps: [
+      {
+        id: 'add-location-intro',
+        title: 'Adding a GroupID',
+        text: 'This is where you can add details for a new GroupID (location). The system automatically assigns a sequential ID number.',
+        buttons: [
+          {
+            text: 'Skip Tour',
+            type: 'cancel',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Next',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      },
+      {
+        id: 'project-dropdown',
+        title: 'Select Project',
+        text: 'If needed, you can switch between different projects using this dropdown menu.',
+        attachTo: {
+          element: '.project-dropdown',
+          on: 'bottom'
+        },
+        buttons: [
+          {
+            text: 'Back',
+            type: 'back',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Next',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      },
+      {
+        id: 'location-photo',
+        title: 'Capture Photo',
+        text: 'Click here to take a photo of the location. This helps identify the physical location in the showroom.',
+        attachTo: {
+          element: '.photo-capture-button',
+          on: 'bottom'
+        },
+        buttons: [
+          {
+            text: 'Back',
+            type: 'back',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Next',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      },
+      {
+        id: 'scan-barcodes',
+        title: 'Scan Barcodes',
+        text: 'After capturing a photo, click here to start scanning barcodes for this location.',
+        attachTo: {
+          element: '.scan-button',
+          on: 'bottom'
+        },
+        buttons: [
+          {
+            text: 'Back',
+            type: 'back',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Next',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      },
+      {
+        id: 'save-location',
+        title: 'Save GroupID',
+        text: 'After adding all details, click Save to store this GroupID. You\'ll be guided to add barcodes next.',
+        attachTo: {
+          element: '.save-location-button',
+          on: 'top'
+        },
+        buttons: [
+          {
+            text: 'Back',
+            type: 'back',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Finish Tour',
             type: 'next',
             classes: 'shepherd-button-primary'
           }
@@ -313,10 +572,10 @@ const tourConfigs: TourConfig = {
       {
         id: 'barcode-welcome',
         title: 'Barcode Scanning',
-        text: 'Now you can scan barcodes for this location.',
+        text: 'Now you can scan barcodes for this location. Position barcodes within the camera frame to scan them automatically.',
         buttons: [
           {
-            text: 'Skip',
+            text: 'Skip Tour',
             type: 'cancel',
             classes: 'shepherd-button-secondary'
           },
@@ -328,11 +587,11 @@ const tourConfigs: TourConfig = {
         ]
       },
       {
-        id: 'scan-button',
-        title: 'Start Scanning',
-        text: 'Click here to activate the camera and scan barcodes.',
+        id: 'camera-viewfinder',
+        title: 'Camera Viewfinder',
+        text: 'Position barcodes within these markers for best scanning results. The system works with most standard barcode formats.',
         attachTo: {
-          element: '.scan-button',
+          element: '.scanner-viewfinder',
           on: 'bottom'
         },
         buttons: [
@@ -349,9 +608,9 @@ const tourConfigs: TourConfig = {
         ]
       },
       {
-        id: 'barcode-list',
-        title: 'Scanned Barcodes',
-        text: 'Your scanned barcodes will appear here. You can remove items if needed.',
+        id: 'scanned-list',
+        title: 'Scanned Items',
+        text: 'Scanned barcodes appear here. The system automatically prevents duplicate scans and saves your progress.',
         attachTo: {
           element: '.barcode-list',
           on: 'top'
@@ -363,7 +622,100 @@ const tourConfigs: TourConfig = {
             classes: 'shepherd-button-secondary'
           },
           {
-            text: 'Finish',
+            text: 'Next',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      },
+      {
+        id: 'finish-scanning',
+        title: 'Finishing Up',
+        text: 'When you\'ve scanned all items, click here to save and move to the next step. You\'ll see options to add another GroupID or finish your project.',
+        attachTo: {
+          element: '.finish-scanning-button',
+          on: 'top'
+        },
+        buttons: [
+          {
+            text: 'Back',
+            type: 'back',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Finish Tour',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      }
+    ]
+  },
+  'reports': {
+    defaultStepOptions: {
+      classes: 'shepherd-theme-custom',
+      scrollTo: true,
+      cancelIcon: {
+        enabled: true
+      }
+    },
+    exitOnEsc: true,
+    useModalOverlay: true,
+    steps: [
+      {
+        id: 'reports-welcome',
+        title: 'Reports & Analytics',
+        text: 'This is your reports dashboard where you can generate and view analytical data from your projects.',
+        buttons: [
+          {
+            text: 'Skip Tour',
+            type: 'cancel',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Next',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      },
+      {
+        id: 'generate-report',
+        title: 'Generate Reports',
+        text: 'Click here to generate different types of reports from your project data, including Excel and PDF formats.',
+        attachTo: {
+          element: '.generate-report-button',
+          on: 'bottom'
+        },
+        buttons: [
+          {
+            text: 'Back',
+            type: 'back',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Next',
+            type: 'next',
+            classes: 'shepherd-button-primary'
+          }
+        ]
+      },
+      {
+        id: 'report-list',
+        title: 'Report History',
+        text: 'Previously generated reports appear here. You can download or view them again at any time.',
+        attachTo: {
+          element: '.report-list',
+          on: 'top'
+        },
+        buttons: [
+          {
+            text: 'Back',
+            type: 'back',
+            classes: 'shepherd-button-secondary'
+          },
+          {
+            text: 'Finish Tour',
             type: 'next',
             classes: 'shepherd-button-primary'
           }
