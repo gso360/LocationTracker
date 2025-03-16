@@ -21,6 +21,9 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  getPendingUsers(): Promise<User[]>;
+  updateUser(id: number, userData: Partial<User>): Promise<User | undefined>;
 
   // Project operations
   getProject(id: number): Promise<Project | undefined>;
@@ -163,10 +166,44 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
+    const now = new Date();
+    const user: User = { 
+      id,
+      username: insertUser.username,
+      password: insertUser.password,
+      role: insertUser.role || 'user',
+      approved: insertUser.approved !== undefined ? insertUser.approved : false,
+      createdAt: now,
+      approvedAt: null,
+      approvedBy: null
+    };
     this.users.set(id, user);
     this.saveToDisk();
     return user;
+  }
+  
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values()).sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }
+  
+  async getPendingUsers(): Promise<User[]> {
+    return Array.from(this.users.values())
+      .filter(user => !user.approved && user.role !== 'superadmin')
+      .sort((a, b) => {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+  }
+  
+  async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { ...user, ...userData };
+    this.users.set(id, updatedUser);
+    this.saveToDisk();
+    return updatedUser;
   }
 
   // Project operations

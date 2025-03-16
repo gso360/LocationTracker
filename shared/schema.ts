@@ -6,11 +6,18 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  role: text("role").default("user").notNull(), // Role can be 'admin', 'superadmin', or 'user'
+  approved: boolean("approved").default(false).notNull(), // Whether the user is approved to access the system
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  approvedAt: timestamp("approved_at"), // When the user was approved
+  approvedBy: integer("approved_by").references(() => users.id), // Who approved the user
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
+  role: true,
+  approved: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
