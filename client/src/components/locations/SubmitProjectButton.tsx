@@ -49,9 +49,9 @@ const SubmitProjectButton: React.FC<SubmitProjectButtonProps> = ({
       if (onProjectSubmitted) {
         onProjectSubmitted();
       } else {
-        // Navigate to the projects list after a short delay
+        // Navigate to the projects list after a short delay using direct DOM navigation
         setTimeout(() => {
-          setLocation("/projects");
+          window.location.href = "/projects";
         }, 1000);
       }
     } catch (error: any) {

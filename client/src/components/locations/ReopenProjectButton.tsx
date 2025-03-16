@@ -49,6 +49,11 @@ const ReopenProjectButton: React.FC<ReopenProjectButtonProps> = ({
       
       if (onProjectReopened) {
         onProjectReopened();
+      } else {
+        // Navigate to the project page after reopening using direct DOM navigation
+        setTimeout(() => {
+          window.location.href = `/projects/${projectId}`;
+        }, 1000);
       }
     } catch (error: any) {
       console.error("Error reopening project:", error);
