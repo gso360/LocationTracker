@@ -52,6 +52,26 @@ export interface IStorage {
   createReport(report: InsertReport): Promise<Report>;
 }
 
+import fs from 'fs';
+import path from 'path';
+
+// Type for persisted data
+interface PersistedData {
+  users: Array<[number, User]>;
+  projects: Array<[number, Project]>;
+  locations: Array<[number, Location]>;
+  barcodes: Array<[number, Barcode]>;
+  reports: Array<[number, Report]>;
+  currentUserId: number;
+  currentProjectId: number;
+  currentLocationId: number;
+  currentBarcodeId: number;
+  currentReportId: number;
+}
+
+// Data file path
+const DATA_FILE = path.join(process.cwd(), 'data-store.json');
+
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private projects: Map<number, Project>;
@@ -77,6 +97,57 @@ export class MemStorage implements IStorage {
     this.currentLocationId = 1;
     this.currentBarcodeId = 1;
     this.currentReportId = 1;
+    
+    // Load persisted data if available
+    this.loadFromDisk();
+  }
+  
+  // Persist data to disk
+  private saveToDisk(): void {
+    try {
+      const data: PersistedData = {
+        users: Array.from(this.users.entries()),
+        projects: Array.from(this.projects.entries()),
+        locations: Array.from(this.locations.entries()),
+        barcodes: Array.from(this.barcodes.entries()),
+        reports: Array.from(this.reports.entries()),
+        currentUserId: this.currentUserId,
+        currentProjectId: this.currentProjectId,
+        currentLocationId: this.currentLocationId,
+        currentBarcodeId: this.currentBarcodeId,
+        currentReportId: this.currentReportId
+      };
+      
+      fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    } catch (error) {
+      console.error('Error saving data to disk:', error);
+    }
+  }
+  
+  // Load data from disk
+  private loadFromDisk(): void {
+    try {
+      if (fs.existsSync(DATA_FILE)) {
+        const rawData = fs.readFileSync(DATA_FILE, 'utf8');
+        const data: PersistedData = JSON.parse(rawData);
+        
+        // Restore maps from arrays
+        this.users = new Map(data.users);
+        this.projects = new Map(data.projects);
+        this.locations = new Map(data.locations);
+        this.barcodes = new Map(data.barcodes);
+        this.reports = new Map(data.reports);
+        
+        // Restore counters
+        this.currentUserId = data.currentUserId;
+        this.currentProjectId = data.currentProjectId;
+        this.currentLocationId = data.currentLocationId;
+        this.currentBarcodeId = data.currentBarcodeId;
+        this.currentReportId = data.currentReportId;
+      }
+    } catch (error) {
+      console.error('Error loading data from disk:', error);
+    }
   }
 
   // User operations
@@ -94,6 +165,7 @@ export class MemStorage implements IStorage {
     const id = this.currentUserId++;
     const user: User = { ...insertUser, id };
     this.users.set(id, user);
+    this.saveToDisk();
     return user;
   }
 
@@ -125,6 +197,7 @@ export class MemStorage implements IStorage {
       createdAt: new Date() 
     };
     this.projects.set(id, project);
+    this.saveToDisk();
     return project;
   }
 
@@ -134,6 +207,7 @@ export class MemStorage implements IStorage {
 
     const updatedProject = { ...project, ...updateData };
     this.projects.set(id, updatedProject);
+    this.saveToDisk();
     return updatedProject;
   }
 
@@ -153,6 +227,8 @@ export class MemStorage implements IStorage {
       locationIdsToDelete.forEach(locationId => {
         this.deleteLocation(locationId);
       });
+      
+      this.saveToDisk();
     }
     
     return deleted;
@@ -195,6 +271,7 @@ export class MemStorage implements IStorage {
       createdAt: new Date() 
     };
     this.locations.set(id, location);
+    this.saveToDisk();
     return location;
   }
 
@@ -204,6 +281,7 @@ export class MemStorage implements IStorage {
 
     const updatedLocation = { ...location, ...updateData };
     this.locations.set(id, updatedLocation);
+    this.saveToDisk();
     return updatedLocation;
   }
 
@@ -223,6 +301,8 @@ export class MemStorage implements IStorage {
       barcodeIdsToDelete.forEach(barcodeId => {
         this.barcodes.delete(barcodeId);
       });
+      
+      this.saveToDisk();
     }
     
     return deleted;
@@ -274,11 +354,16 @@ export class MemStorage implements IStorage {
       createdAt: new Date() 
     };
     this.barcodes.set(id, barcode);
+    this.saveToDisk();
     return barcode;
   }
 
   async deleteBarcode(id: number): Promise<boolean> {
-    return this.barcodes.delete(id);
+    const deleted = this.barcodes.delete(id);
+    if (deleted) {
+      this.saveToDisk();
+    }
+    return deleted;
   }
 
   // Report operations
@@ -305,6 +390,7 @@ export class MemStorage implements IStorage {
       createdAt: new Date() 
     };
     this.reports.set(id, report);
+    this.saveToDisk();
     return report;
   }
 }

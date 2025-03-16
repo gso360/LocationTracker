@@ -5,6 +5,14 @@ import session from "express-session";
 import passport from "passport";
 import { setupPassport } from "./auth";
 import MemoryStore from "memorystore";
+import path from "path";
+import fs from "fs";
+
+// Ensure sessions directory exists
+const sessionsDir = path.join(process.cwd(), 'sessions');
+if (!fs.existsSync(sessionsDir)) {
+  fs.mkdirSync(sessionsDir, { recursive: true });
+}
 
 const MemoryStoreSession = MemoryStore(session);
 const app = express();
@@ -15,7 +23,7 @@ app.use(express.json({ limit: '10mb' }));
 // Increase URL-encoded body size limit to 10MB for form submissions with images
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
-// Set up session handling with memory store
+// Set up session handling with persistent memory store
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'inventory-management-secret',
@@ -23,10 +31,13 @@ app.use(
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     },
     store: new MemoryStoreSession({
       checkPeriod: 86400000, // 24 hours
+      // Save sessions to disk to persist between server restarts
+      path: sessionsDir,
+      ttl: 7 * 24 * 60 * 60 * 1000, // 7 days
     }),
   })
 );
