@@ -97,7 +97,7 @@ export const reports = pgTable("reports", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   type: text("type").notNull(),              // "excel" or "pdf" 
-  projectId: integer("project_id").notNull(), // Related project
+  projectId: integer("project_id"),          // Related project (made optional)
   emailCopy: boolean("email_copy").default(false),  // Email me a copy
   syncAfter: boolean("sync_after").default(true),   // Sync after tapping Submit
   showPdf: boolean("show_pdf").default(false),      // Show PDF after sync

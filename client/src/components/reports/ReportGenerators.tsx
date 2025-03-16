@@ -27,11 +27,20 @@ const ReportGenerators = ({ projectId }: ReportGeneratorsProps) => {
         const filename = await generateExcelReport(data.data, data.projectData);
         
         // Create report record with project ID if available
-        await apiRequest("POST", "/api/reports", {
+        const reportData: any = {
           name: `Excel Report - ${new Date().toLocaleDateString()}`,
           type: "excel",
-          projectId: projectId || undefined
-        });
+          emailCopy: false,
+          syncAfter: true,
+          showPdf: false
+        };
+        
+        // Only add projectId if it exists
+        if (projectId) {
+          reportData.projectId = projectId;
+        }
+        
+        await apiRequest("POST", "/api/reports", reportData);
         
         // Invalidate both reports and projects to refresh UI
         queryClient.invalidateQueries({ queryKey: ["/api/reports"] });
@@ -69,14 +78,20 @@ const ReportGenerators = ({ projectId }: ReportGeneratorsProps) => {
         const filename = await generatePDFReport(data.data, data.projectData);
         
         // Create report record
-        await apiRequest("POST", "/api/reports", {
+        const reportData: any = {
           name: `PDF Report - ${new Date().toLocaleDateString()}`,
           type: "pdf",
-          projectId: projectId || undefined, // Set project ID if provided
           emailCopy: false,
           syncAfter: true,
           showPdf: false
-        });
+        };
+        
+        // Only add projectId if it exists
+        if (projectId) {
+          reportData.projectId = projectId;
+        }
+        
+        await apiRequest("POST", "/api/reports", reportData);
         
         // Invalidate both reports and projects to refresh UI
         queryClient.invalidateQueries({ queryKey: ["/api/reports"] });
