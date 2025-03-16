@@ -4,10 +4,22 @@ import 'jspdf-autotable';
 import type { Location, Barcode, Project } from "@shared/schema";
 import { formatDate } from './utils';
 
+// Helper function to generate a filename from project data
+const getFileName = (project?: Project | null) => {
+  const date = new Date().toLocaleString().replace(/[/:\\]/g, '-');
+  if (!project) return `Inventory-${date}`;
+  
+  // Include Showroom Name, Date, and Scanner's Name in the file name
+  const showroomName = project.name || 'Unknown';
+  const scannerName = project.scannerName || 'Unknown';
+  
+  return `${showroomName}-${date}-${scannerName}`.replace(/[/:\\]/g, '-');
+};
+
 // Generate an Excel/CSV report with all barcodes and their locations
 export const generateExcelReport = async (
   data: (Location & { barcodes: Barcode[] })[],
-  projectId?: number
+  projectData?: Project | null
 ): Promise<string> => {
   // Sort locations by GroupID numerically ascending
   const sortedData = [...data].sort((a, b) => {
@@ -48,18 +60,6 @@ export const generateExcelReport = async (
     }
   });
   
-  // Create filename based on project details
-  const getFileName = (projectName?: string) => {
-    const date = new Date().toLocaleString().replace(/[/:\\]/g, '-');
-    if (!projectName) return `Inventory-${date}`;
-    return `${projectName}-${date}`;
-  };
-
-  // Determine project name for the filename
-  const projectName = sortedData.length > 0 && projectId !== undefined
-    ? `Project-${projectId}` 
-    : undefined;
-  
   // Create workbook and worksheet
   const worksheet = XLSX.utils.json_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
@@ -82,7 +82,7 @@ export const generateExcelReport = async (
   const url = URL.createObjectURL(blob);
   
   // Create download element
-  const filename = `inventory_report_${getFileName(projectName)}.xlsx`;
+  const filename = `inventory_report_${getFileName(projectData)}.xlsx`;
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;
@@ -96,7 +96,7 @@ export const generateExcelReport = async (
 // Generate a PDF report with location photos
 export const generatePDFReport = async (
   data: (Location & { barcodes: Barcode[] })[], 
-  projectId?: number
+  projectData?: Project | null
 ): Promise<string> => {
   // Sort GroupIDs in ascending order (lowest first)
   const sortedData = [...data].sort((a, b) => {
@@ -125,12 +125,13 @@ export const generatePDFReport = async (
   doc.setTextColor(0, 0, 0); // Black
   doc.text('Virtual Showroom Location ID Form', 105, 15, { align: 'center' });
   
-  // Project information (placeholder values if not available)
+  // Project information (using available data or defaults)
   const projectInfo = {
-    name: projectId ? `Project ${projectId}` : 'Not specified',
+    name: projectData ? projectData.name : 'Not specified',
     scanDate: formatDate(new Date()),
-    tourId: 'Not specified',
-    groupIdType: 'GroupID (1-400)'
+    scannerName: projectData?.scannerName || 'Not specified',
+    tourId: projectData?.tourId || 'Not specified',
+    groupIdType: projectData?.groupIdType || 'GroupID (1-400)'
   };
   
   // Create showroom info table
@@ -246,8 +247,8 @@ export const generatePDFReport = async (
     }
   }
   
-  // Save the PDF
-  const filename = `showroom_location_report_${new Date().toISOString().split('T')[0]}.pdf`;
+  // Generate a filename with showroom name, date, and scanner name
+  const filename = `showroom_location_report_${getFileName(projectData)}.pdf`;
   doc.save(filename);
   
   return filename;
