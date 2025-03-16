@@ -226,12 +226,22 @@ export default function Projects() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between mb-2">
-                  <Badge 
-                    variant={project.submitted ? 'outline' : (project.status === 'completed' ? 'default' : 'secondary')}
-                    className={`mb-2 ${project.submitted ? 'bg-green-50 text-green-700 border-green-200' : ''}`}
-                  >
-                    {project.submitted ? 'Submitted' : (project.status === 'completed' ? 'Completed' : 'In Progress')}
-                  </Badge>
+                  {project.submitted ? (
+                    <Badge 
+                      variant="outline"
+                      className="mb-2 bg-green-50 text-green-700 border-green-200"
+                    >
+                      Submitted
+                    </Badge>
+                  ) : (
+                    <Badge 
+                      variant={project.status === 'completed' ? 'default' : 'secondary'}
+                      className="mb-2"
+                    >
+                      {project.status === 'completed' ? 'Completed' : 'In Progress'}
+                    </Badge>
+                  )}
+                  
                   {!project.submitted && (
                     <Button
                       size="sm"
@@ -252,7 +262,7 @@ export default function Projects() {
                   )}
                 </div>
                 {project.submitted && project.submittedAt && (
-                  <div className="flex items-center text-xs text-muted-foreground mb-2">
+                  <div className="flex items-center text-xs text-green-700 mb-2">
                     <CheckCircle className="h-3 w-3 mr-1 text-green-600" />
                     <span>Submitted: {new Date(project.submittedAt).toLocaleDateString()}</span>
                   </div>
@@ -266,9 +276,9 @@ export default function Projects() {
                     className="w-full"
                     onClick={() => setLocation(`/projects/${project.id}`)}
                   >
-                    Create GroupIDs
+                    {project.submitted ? 'View GroupIDs' : 'Create GroupIDs'}
                   </Button>
-                  {project.status === 'completed' && (
+                  {(project.status === 'completed' || project.submitted) && (
                     <Button 
                       variant="outline" 
                       className="w-full"
