@@ -114,6 +114,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete project" });
     }
   });
+  
+  // Toggle project status (in_progress/completed)
+  router.patch("/projects/:id/toggle-status", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const project = await storage.getProject(id);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Toggle the status between 'in_progress' and 'completed'
+      const newStatus = project.status === 'completed' ? 'in_progress' : 'completed';
+      
+      const updatedProject = await storage.updateProject(id, { status: newStatus });
+      res.json(updatedProject);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update project status" });
+    }
+  });
 
   // Get all locations for a specific project
   router.get("/projects/:id/locations", async (req: Request, res: Response) => {

@@ -13,10 +13,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
-import { PlusCircle, Edit, Trash2 } from "lucide-react";
+import { PlusCircle, Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { type Project } from "@shared/schema";
 
 export default function Projects() {
@@ -132,6 +133,29 @@ export default function Projects() {
       setIsSubmitting(false);
     }
   };
+  
+  // Handle toggling project status
+  const handleToggleStatus = async (projectId: number, currentStatus: string) => {
+    try {
+      await apiRequest('PATCH', `/api/projects/${projectId}/toggle-status`);
+      
+      const newStatus = currentStatus === 'completed' ? 'in_progress' : 'completed';
+      
+      toast({
+        title: "Status Updated",
+        description: `Project marked as ${newStatus === 'completed' ? 'completed' : 'in progress'}`
+      });
+      
+      // Refresh projects list
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update project status",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div className="container mx-auto py-4">
@@ -201,6 +225,30 @@ export default function Projects() {
                 </div>
               </CardHeader>
               <CardContent>
+                <div className="flex items-center justify-between mb-2">
+                  <Badge 
+                    variant={project.status === 'completed' ? 'default' : 'secondary'}
+                    className="mb-2"
+                  >
+                    {project.status === 'completed' ? 'Completed' : 'In Progress'}
+                  </Badge>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleStatus(project.id, project.status);
+                    }}
+                    title={project.status === 'completed' ? 'Mark as in progress' : 'Mark as completed'}
+                  >
+                    {project.status === 'completed' ? (
+                      <XCircle className="h-4 w-4 mr-1" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                    )}
+                    {project.status === 'completed' ? 'Reopen' : 'Complete'}
+                  </Button>
+                </div>
                 {project.description && (
                   <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
                 )}
