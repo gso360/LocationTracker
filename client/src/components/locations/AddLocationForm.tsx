@@ -94,21 +94,15 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
             <h3 className="font-medium">Capture GroupID Photo</h3>
           </div>
           
-          <div className="bg-gray-900 aspect-video flex items-center justify-center">
-            <div className="text-white opacity-50">
-              <Camera className="h-10 w-10 mx-auto mb-2" />
-              <p>Click the button below to take a photo</p>
+          <button 
+            onClick={handleCapturePhoto}
+            className="w-full py-8 bg-gray-900 flex items-center justify-center hover:bg-gray-800 transition-colors"
+          >
+            <div className="text-white opacity-50 text-center">
+              <Camera className="h-8 w-8 mx-auto mb-1" />
+              <p className="text-sm">Tap to take photo</p>
             </div>
-          </div>
-          
-          <div className="p-4 flex justify-center">
-            <button 
-              onClick={handleCapturePhoto}
-              className="bg-[#FF6D00] text-white rounded-full w-16 h-16 flex items-center justify-center"
-            >
-              <Camera className="h-6 w-6" />
-            </button>
-          </div>
+          </button>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow mb-6 overflow-hidden">
