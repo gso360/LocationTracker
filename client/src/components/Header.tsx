@@ -18,20 +18,6 @@ const Header = () => {
             <Menu className="h-6 w-6 text-[#455A64]" />
           </button>
         </div>
-        <div>
-          <button 
-            className="p-2 rounded-full hover:bg-gray-100 touch-target" 
-            aria-label="Search"
-          >
-            <Search className="h-6 w-6 text-[#455A64]" />
-          </button>
-          <button 
-            className="p-2 rounded-full hover:bg-gray-100 touch-target" 
-            aria-label="More options"
-          >
-            <MoreVertical className="h-6 w-6 text-[#455A64]" />
-          </button>
-        </div>
       </div>
       
       {/* Tab Navigation */}
