@@ -1,12 +1,13 @@
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-import type { Location, Barcode } from "@shared/schema";
+import type { Location, Barcode, Project } from "@shared/schema";
 import { formatDate } from './utils';
 
 // Generate an Excel/CSV report with all barcodes and their locations
 export const generateExcelReport = async (
-  data: (Location & { barcodes: Barcode[] })[]
+  data: (Location & { barcodes: Barcode[] })[],
+  projectId?: number
 ): Promise<string> => {
   // Sort locations by GroupID numerically ascending
   const sortedData = [...data].sort((a, b) => {
@@ -48,26 +49,21 @@ export const generateExcelReport = async (
   });
   
   // Create filename based on project details
-  const getFileName = (project?: any) => {
+  const getFileName = (projectName?: string) => {
     const date = new Date().toLocaleString().replace(/[/:\\]/g, '-');
-    if (!project) return `Inventory-${date}`;
-    
-    const parts = [project.name];
-    if (project.lineVendor) parts.push(project.lineVendor);
-    if (project.scannerName) parts.push(project.scannerName);
-    parts.push(date);
-    
-    return parts.join(' - ');
+    if (!projectName) return `Inventory-${date}`;
+    return `${projectName}-${date}`;
   };
 
+  // Determine project name for the filename
+  const projectName = sortedData.length > 0 && projectId !== undefined
+    ? `Project-${projectId}` 
+    : undefined;
+  
   // Create workbook and worksheet
   const worksheet = XLSX.utils.json_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Inventory');
-
-  // Use project data from first location if available
-  const projectData = sortedData[0]?.project;
-  const fileName = getFileName(projectData);
   
   // Auto-size columns
   const colWidths = [
@@ -86,7 +82,7 @@ export const generateExcelReport = async (
   const url = URL.createObjectURL(blob);
   
   // Create download element
-  const filename = `inventory_report_${new Date().toISOString().split('T')[0]}.xlsx`;
+  const filename = `inventory_report_${getFileName(projectName)}.xlsx`;
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;
@@ -100,7 +96,7 @@ export const generateExcelReport = async (
 // Generate a PDF report with location photos
 export const generatePDFReport = async (
   data: (Location & { barcodes: Barcode[] })[], 
-  projectData?: any
+  projectId?: number
 ): Promise<string> => {
   // Sort GroupIDs in ascending order (lowest first)
   const sortedData = [...data].sort((a, b) => {
@@ -129,11 +125,13 @@ export const generatePDFReport = async (
   doc.setTextColor(0, 0, 0); // Black
   doc.text('Virtual Showroom Location ID Form', 105, 15, { align: 'center' });
   
-  // Create header table with project info
-  const showroomName = projectData?.name || 'Not specified';
-  const scanDate = projectData?.scanDate || formatDate(new Date());
-  const tourId = projectData?.tourId || 'Not specified';
-  const groupIdType = projectData?.groupIdType || 'GroupID (1-400)';
+  // Project information (placeholder values if not available)
+  const projectInfo = {
+    name: projectId ? `Project ${projectId}` : 'Not specified',
+    scanDate: formatDate(new Date()),
+    tourId: 'Not specified',
+    groupIdType: 'GroupID (1-400)'
+  };
   
   // Create showroom info table
   doc.setLineWidth(0.2);
@@ -152,8 +150,8 @@ export const generatePDFReport = async (
   doc.rect(105, 35, 85, 10);
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
-  doc.text(showroomName, 22, 41);
-  doc.text(scanDate, 107, 41);
+  doc.text(projectInfo.name, 22, 41);
+  doc.text(projectInfo.scanDate, 107, 41);
   
   // Third row
   doc.rect(20, 45, 85, 10);
@@ -164,8 +162,8 @@ export const generatePDFReport = async (
   // Fourth row
   doc.rect(20, 55, 85, 10);
   doc.rect(105, 55, 85, 10);
-  doc.text(tourId, 22, 61);
-  doc.text(groupIdType, 107, 61);
+  doc.text(projectInfo.tourId, 22, 61);
+  doc.text(projectInfo.groupIdType, 107, 61);
   
   // Add each location with photo
   let yPos = 75;
