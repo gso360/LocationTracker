@@ -11,6 +11,15 @@ import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { register, login, getCurrentUser, logout, isAuthenticated } from './auth';
 
+// Helper function to format dates
+function formatDate(date: Date): string {
+  return date.toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric'
+  });
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   const router = express.Router();
 
@@ -132,6 +141,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedProject);
     } catch (error) {
       res.status(500).json({ message: "Failed to update project status" });
+    }
+  });
+  
+  // Submit a project - mark as complete and set submission data
+  router.post("/projects/:id/submit", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const project = await storage.getProject(id);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      // Get all locations for this project
+      const locations = await storage.getLocationsByProject(id);
+      
+      // Check if there's at least one location with barcodes
+      if (locations.length === 0) {
+        return res.status(400).json({ 
+          message: "Cannot submit project without any locations. Please add at least one location." 
+        });
+      }
+      
+      // Check for barcodes
+      const locationWithBarcodes = await Promise.all(
+        locations.map(async (loc) => {
+          const barcodes = await storage.getBarcodesByLocation(loc.id);
+          return { ...loc, barcodes };
+        })
+      );
+      
+      const hasAnyBarcodes = locationWithBarcodes.some(loc => loc.barcodes.length > 0);
+      if (!hasAnyBarcodes) {
+        return res.status(400).json({ 
+          message: "Cannot submit project without any barcodes. Please scan at least one barcode." 
+        });
+      }
+      
+      // Update the project as submitted
+      const submissionTime = new Date();
+      const updatedProject = await storage.updateProject(id, { 
+        status: 'completed',
+        submitted: true, 
+        submittedAt: submissionTime
+      });
+      
+      // Generate a final PDF report
+      const reportName = `Final Project Report - ${project.name} - ${formatDate(submissionTime)}`;
+      await storage.createReport({
+        name: reportName,
+        type: 'pdf',
+        projectId: id,
+        emailCopy: true,
+        syncAfter: true,
+        showPdf: true,
+      });
+      
+      res.json(updatedProject);
+    } catch (error) {
+      console.error("Submission error:", error);
+      res.status(500).json({ message: "Failed to submit project" });
+    }
+  });
+  
+  // Reopen a project that was previously submitted
+  router.post("/projects/:id/reopen", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const project = await storage.getProject(id);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      
+      if (!project.submitted) {
+        return res.status(400).json({ message: "Project is not in submitted state" });
+      }
+      
+      // Reopen the project
+      const updatedProject = await storage.updateProject(id, { 
+        status: 'in_progress',
+        submitted: false
+      });
+      
+      res.json(updatedProject);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to reopen project" });
     }
   });
 
