@@ -54,7 +54,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
             The GroupID will be assigned the next sequential number automatically.
           </p>
         </div>
-
+        
         <div className="mb-4">
           <label htmlFor="locationNotes" className="block text-sm font-medium text-gray-700 mb-1">
             Notes (Optional)
@@ -68,7 +68,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
             placeholder="Add any details about this GroupID"
           ></textarea>
         </div>
-
+        
         <div className="mb-4">
           <label htmlFor="pinPlacement" className="block text-sm font-medium text-gray-700 mb-1">
             Where to place pin (Optional)
@@ -86,28 +86,28 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
           </p>
         </div>
       </div>
-
+      
       {/* Photo Section */}
       {!imageData ? (
-        <div className="fixed inset-0 z-50 bg-black">
-          <div className="h-screen flex flex-col justify-between">
+        <div className="fixed inset-0 z-50 bg-black min-h-screen">
+          <div className="absolute inset-0 flex flex-col">
             <div className="p-4 flex items-center justify-between bg-black/50">
               <h3 className="font-medium text-white">Capture GroupID Photo</h3>
             </div>
-
+            
             <div className="flex-1 flex items-center justify-center">
               <div className="text-white opacity-50 text-center">
-                <Camera className="h-10 w-10 mx-auto mb-2" />
-                <p>Click the button below to take a photo</p>
+                <Camera className="h-16 w-16 mx-auto mb-4" />
+                <p className="text-lg">Click the button below to take a photo</p>
               </div>
             </div>
-
-            <div className="p-4 flex justify-center mb-4">
+            
+            <div className="fixed bottom-8 left-0 right-0 flex justify-center">
               <button 
                 onClick={handleCapturePhoto}
-                className="bg-[#FF6D00] text-white rounded-full w-14 h-14 flex items-center justify-center"
+                className="bg-[#FF6D00] text-white rounded-full w-20 h-20 flex items-center justify-center"
               >
-                <Camera className="h-7 w-7" />
+                <Camera className="h-8 w-8" />
               </button>
             </div>
           </div>
@@ -124,7 +124,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
               Retake
             </button>
           </div>
-
+          
           <div className="aspect-video bg-gray-200">
             <img 
               src={imageData} 
@@ -134,7 +134,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
           </div>
         </div>
       )}
-
+      
       {/* Barcode Scanner Section */}
       <div className="bg-white rounded-lg shadow mb-6">
         <div className="p-4 border-b">
@@ -143,7 +143,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
             Scan one or more product barcodes to associate with this GroupID.
           </p>
         </div>
-
+        
         <div className="p-4">
           {barcodes.length > 0 ? (
             <div className="space-y-2">
@@ -169,7 +169,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
             </div>
           )}
         </div>
-
+        
         <div className="p-4 border-t">
           <button 
             onClick={handleScanBarcode}
@@ -180,7 +180,7 @@ const AddLocationForm: React.FC<AddLocationFormProps> = ({
           </button>
         </div>
       </div>
-
+      
       {/* Save Button */}
       <div className="mb-4">
         <button 
