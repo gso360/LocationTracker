@@ -12,7 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface SubmitProjectButtonProps {
@@ -34,6 +34,9 @@ const SubmitProjectButton: React.FC<SubmitProjectButtonProps> = ({
       setIsSubmitting(true);
       
       const response = await apiRequest("POST", `/api/projects/${projectId}/submit`);
+      
+      // Invalidate projects query to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       
       toast({
         title: "Project Submitted",

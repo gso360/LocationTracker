@@ -33,7 +33,9 @@ const ReportGenerators = ({ projectId }: ReportGeneratorsProps) => {
           projectId: projectId || undefined
         });
         
+        // Invalidate both reports and projects to refresh UI
         queryClient.invalidateQueries({ queryKey: ["/api/reports"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
         
         toast({
           title: "Excel Report Generated",
@@ -76,7 +78,9 @@ const ReportGenerators = ({ projectId }: ReportGeneratorsProps) => {
           showPdf: false
         });
         
+        // Invalidate both reports and projects to refresh UI
         queryClient.invalidateQueries({ queryKey: ["/api/reports"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
         
         toast({
           title: "PDF Report Generated",

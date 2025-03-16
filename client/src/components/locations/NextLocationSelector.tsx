@@ -84,6 +84,20 @@ const NextLocationSelector = ({ locations, projectId, onBack }: NextLocationSele
       const response = await apiRequest("POST", "/api/reports", reportData);
       const report = await response.json();
       
+      // Submit the project (Mark as submitted and set submission date)
+      try {
+        await apiRequest("POST", `/api/projects/${projectId}/submit`);
+        console.log("Project successfully marked as submitted");
+      } catch (submitError) {
+        console.error("Error submitting project:", submitError);
+        toast({
+          title: "Submission Warning",
+          description: "Report was created but there was an issue marking the project as submitted.",
+          variant: "destructive"
+        });
+        // We'll continue with the report generation even if submission fails
+      }
+      
       // Generate a PDF report for this project
       try {
         // Get project details and locations with barcodes
