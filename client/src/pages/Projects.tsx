@@ -227,28 +227,36 @@ export default function Projects() {
               <CardContent>
                 <div className="flex items-center justify-between mb-2">
                   <Badge 
-                    variant={project.status === 'completed' ? 'default' : 'secondary'}
-                    className="mb-2"
+                    variant={project.submitted ? 'outline' : (project.status === 'completed' ? 'default' : 'secondary')}
+                    className={`mb-2 ${project.submitted ? 'bg-green-50 text-green-700 border-green-200' : ''}`}
                   >
-                    {project.status === 'completed' ? 'Completed' : 'In Progress'}
+                    {project.submitted ? 'Submitted' : (project.status === 'completed' ? 'Completed' : 'In Progress')}
                   </Badge>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleToggleStatus(project.id, project.status);
-                    }}
-                    title={project.status === 'completed' ? 'Mark as in progress' : 'Mark as completed'}
-                  >
-                    {project.status === 'completed' ? (
-                      <XCircle className="h-4 w-4 mr-1" />
-                    ) : (
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                    )}
-                    {project.status === 'completed' ? 'Reopen' : 'Complete'}
-                  </Button>
+                  {!project.submitted && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggleStatus(project.id, project.status);
+                      }}
+                      title={project.status === 'completed' ? 'Mark as in progress' : 'Mark as completed'}
+                    >
+                      {project.status === 'completed' ? (
+                        <XCircle className="h-4 w-4 mr-1" />
+                      ) : (
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                      )}
+                      {project.status === 'completed' ? 'Reopen' : 'Complete'}
+                    </Button>
+                  )}
                 </div>
+                {project.submitted && project.submittedAt && (
+                  <div className="flex items-center text-xs text-muted-foreground mb-2">
+                    <CheckCircle className="h-3 w-3 mr-1 text-green-600" />
+                    <span>Submitted: {new Date(project.submittedAt).toLocaleDateString()}</span>
+                  </div>
+                )}
                 {project.description && (
                   <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
                 )}

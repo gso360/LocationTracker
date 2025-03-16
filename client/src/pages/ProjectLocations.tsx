@@ -14,6 +14,7 @@ import ReopenProjectButton from "@/components/locations/ReopenProjectButton";
 export default function ProjectLocations() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const params = useParams<{ id: string }>();
   const projectId = params.id ? parseInt(params.id, 10) : undefined;
   const [showLocationSelector, setShowLocationSelector] = useState(false);
