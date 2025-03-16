@@ -14,6 +14,8 @@ import Register from "./pages/Register";
 import MobileQRCode from "./components/MobileQRCode";
 import BluetoothBarcodeProvider from "./components/locations/BluetoothBarcodeManager";
 import { AuthProvider, useAuth, withAuth } from "./contexts/AuthContext";
+import { TourProvider } from "./contexts/TourContext";
+import "./styles/tour.css";
 
 // Wrap components that require authentication
 const ProtectedProjects = withAuth(Projects);
@@ -64,15 +66,17 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BluetoothBarcodeProvider>
-          <AppLayout>
-            <Router />
-          </AppLayout>
-          <Toaster />
-          <div id="mobile-qr">
-            <MobileQRCode />
-          </div>
-        </BluetoothBarcodeProvider>
+        <TourProvider>
+          <BluetoothBarcodeProvider>
+            <AppLayout>
+              <Router />
+            </AppLayout>
+            <Toaster />
+            <div id="mobile-qr">
+              <MobileQRCode />
+            </div>
+          </BluetoothBarcodeProvider>
+        </TourProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

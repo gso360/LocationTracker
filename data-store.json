@@ -21,9 +21,9 @@
         "scanDate": "2025-03-16",
         "groupIdType": null,
         "description": null,
-        "status": "in_progress",
-        "submitted": false,
-        "submittedAt": null,
+        "status": "completed",
+        "submitted": true,
+        "submittedAt": "2025-03-16T17:47:17.161Z",
         "createdAt": "2025-03-16T17:29:55.907Z"
       }
     ]
@@ -66,11 +66,37 @@
         "showPdf": false,
         "createdAt": "2025-03-16T17:30:10.889Z"
       }
+    ],
+    [
+      2,
+      {
+        "id": 2,
+        "name": "Project Report - 3/16/2025",
+        "type": "pdf",
+        "projectId": 1,
+        "emailCopy": false,
+        "syncAfter": true,
+        "showPdf": false,
+        "createdAt": "2025-03-16T17:47:17.063Z"
+      }
+    ],
+    [
+      3,
+      {
+        "id": 3,
+        "name": "Final Project Report - Sample Showroom - 03/16/2025",
+        "type": "pdf",
+        "projectId": 1,
+        "emailCopy": true,
+        "syncAfter": true,
+        "showPdf": true,
+        "createdAt": "2025-03-16T17:47:17.162Z"
+      }
     ]
   ],
   "currentUserId": 2,
   "currentProjectId": 2,
   "currentLocationId": 2,
   "currentBarcodeId": 2,
-  "currentReportId": 2
+  "currentReportId": 4
 }
