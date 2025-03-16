@@ -45,7 +45,8 @@ export default function Login() {
           variant: 'default',
         });
         // Redirect to the projects page after successful login
-        navigate('/projects');
+        // Using direct DOM navigation as a fallback for wouter
+        window.location.href = '/projects';
       } else {
         toast({
           title: 'Login failed',
@@ -127,7 +128,7 @@ export default function Login() {
             <Button 
               variant="link" 
               className="p-0 h-auto font-normal" 
-              onClick={() => navigate('/register')}
+              onClick={() => window.location.href = '/register'}
             >
               Register here
             </Button>

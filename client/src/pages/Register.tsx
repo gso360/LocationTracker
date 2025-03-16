@@ -59,11 +59,11 @@ export default function Register() {
         const loginSuccess = await login(data.username, data.password);
         
         if (loginSuccess) {
-          // Redirect to projects page after successful login
-          navigate('/projects');
+          // Redirect to projects page after successful login using direct DOM navigation
+          window.location.href = '/projects';
         } else {
           // If auto-login fails, redirect to login page
-          navigate('/login');
+          window.location.href = '/login';
         }
       } else {
         const errorData = await response.json();
@@ -165,7 +165,7 @@ export default function Register() {
             <Button 
               variant="link" 
               className="p-0 h-auto font-normal" 
-              onClick={() => navigate('/login')}
+              onClick={() => window.location.href = '/login'}
             >
               Login here
             </Button>
