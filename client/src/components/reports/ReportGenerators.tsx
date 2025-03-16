@@ -5,7 +5,11 @@ import { Table, FileText } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { generateExcelReport, generatePDFReport } from "@/lib/file-utils";
 
-const ReportGenerators = () => {
+interface ReportGeneratorsProps {
+  projectId?: number;
+}
+
+const ReportGenerators = ({ projectId }: ReportGeneratorsProps) => {
   const [isGeneratingExcel, setIsGeneratingExcel] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const { toast } = useToast();
@@ -14,16 +18,19 @@ const ReportGenerators = () => {
   const handleGenerateExcelReport = async () => {
     setIsGeneratingExcel(true);
     try {
-      const response = await apiRequest("GET", "/api/exports/excel");
+      // Add project ID to URL if available
+      const url = projectId ? `/api/exports/excel?projectId=${projectId}` : '/api/exports/excel';
+      const response = await apiRequest("GET", url);
       const data = await response.json();
       
       if (data.success) {
         const filename = await generateExcelReport(data.data, data.projectData);
         
-        // Create report record
+        // Create report record with project ID if available
         await apiRequest("POST", "/api/reports", {
           name: `Excel Report - ${new Date().toLocaleDateString()}`,
-          type: "excel"
+          type: "excel",
+          projectId: projectId || undefined
         });
         
         queryClient.invalidateQueries({ queryKey: ["/api/reports"] });
@@ -89,9 +96,9 @@ const ReportGenerators = () => {
     }
   };
   
-  // Handler for the button click (no parameters)
+  // Handler for the button click
   const handleGeneratePDFReport = () => {
-    generateProjectPDF();
+    generateProjectPDF(projectId);
   };
   
   return (

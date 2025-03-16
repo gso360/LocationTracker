@@ -54,6 +54,7 @@ function Router() {
       <Route path="/projects" component={ProtectedProjects} />
       <Route path="/projects/:id" component={ProtectedProjectLocations} />
       <Route path="/projects/:projectId/add-location" component={ProtectedAddLocation} />
+      <Route path="/projects/:id/reports" component={ProtectedReports} />
       <Route component={NotFound} />
     </Switch>
   );
