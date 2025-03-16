@@ -171,17 +171,39 @@ export class MemStorage implements IStorage {
 
   // Project operations
   async getProject(id: number): Promise<Project | undefined> {
-    return this.projects.get(id);
+    const project = this.projects.get(id);
+    if (project) {
+      // Update last accessed timestamp when project is accessed
+      project.lastAccessedAt = new Date();
+      this.projects.set(id, project);
+      this.saveToDisk();
+    }
+    return project;
   }
 
   async getProjects(): Promise<Project[]> {
     return Array.from(this.projects.values()).sort((a, b) => {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      // Sort by lastAccessedAt to prioritize recently accessed projects
+      const aTime = a.lastAccessedAt ? new Date(a.lastAccessedAt).getTime() : 0;
+      const bTime = b.lastAccessedAt ? new Date(b.lastAccessedAt).getTime() : 0;
+      return bTime - aTime; // Descending order (most recent first)
     });
+  }
+  
+  async getInProgressProjects(): Promise<Project[]> {
+    return Array.from(this.projects.values())
+      .filter(project => project.status === 'in_progress')
+      .sort((a, b) => {
+        // Sort by lastAccessedAt for in-progress projects
+        const aTime = a.lastAccessedAt ? new Date(a.lastAccessedAt).getTime() : 0;
+        const bTime = b.lastAccessedAt ? new Date(b.lastAccessedAt).getTime() : 0;
+        return bTime - aTime; // Descending order (most recent first)
+      });
   }
 
   async createProject(insertProject: InsertProject): Promise<Project> {
     const id = this.currentProjectId++;
+    const now = new Date();
     const project: Project = { 
       id,
       name: insertProject.name,
@@ -194,7 +216,8 @@ export class MemStorage implements IStorage {
       status: insertProject.status || 'in_progress',
       submitted: insertProject.submitted || false,
       submittedAt: insertProject.submittedAt || null,
-      createdAt: new Date() 
+      lastAccessedAt: now, // Set initial last accessed time
+      createdAt: now
     };
     this.projects.set(id, project);
     this.saveToDisk();

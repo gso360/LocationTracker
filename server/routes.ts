@@ -46,8 +46,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all projects
   router.get("/projects", async (req: Request, res: Response) => {
     try {
-      const projects = await storage.getProjects();
-      res.json(projects);
+      const status = req.query.status as string;
+      if (status === 'in_progress') {
+        // Return only in-progress projects, sorted by most recently accessed
+        const inProgressProjects = await storage.getInProgressProjects();
+        res.json(inProgressProjects);
+      } else {
+        // Return all projects, sorted by most recently accessed
+        const projects = await storage.getProjects();
+        res.json(projects);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to retrieve projects" });
     }

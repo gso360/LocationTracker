@@ -96,19 +96,27 @@ const AddLocation = () => {
     }
   });
   
-  // Separate in-progress projects for selection
-  const inProgressProjects = projectsData?.filter((project: Project) => project.status === 'in_progress') || [];
+  // We fetch in-progress projects separately for better sorting by lastAccessedAt
   
   // State for the currently selected project (for dropdown)
   const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>(projectId);
   
+  // Fetch in-progress projects specifically
+  const { data: inProgressProjectsData } = useQuery({
+    queryKey: ['/api/projects', 'in_progress'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/projects?status=in_progress');
+      return await response.json();
+    },
+    enabled: !projectId && !locationId, // Only fetch if we don't have a project ID and aren't editing
+  });
+  
   // Effect to auto-select most recent in-progress project if no project is specified
   useEffect(() => {
     // Only auto-select if we don't have a project ID and we're not editing a location
-    if (!projectId && !locationId && inProgressProjects.length > 0 && !selectedProjectId) {
-      // Get the most recent in-progress project
-      // Assuming projects are sorted with most recent first, or we could sort by lastAccessedAt if available
-      const mostRecentProject = inProgressProjects[0];
+    if (!projectId && !locationId && inProgressProjectsData && inProgressProjectsData.length > 0 && !selectedProjectId) {
+      // Get the most recent in-progress project (the API returns them sorted by lastAccessedAt)
+      const mostRecentProject = inProgressProjectsData[0];
       setSelectedProjectId(mostRecentProject.id);
       
       // Navigate to add location with this project
@@ -116,7 +124,7 @@ const AddLocation = () => {
         window.location.href = `/add-location?projectId=${mostRecentProject.id}`;
       }
     }
-  }, [inProgressProjects, projectId, locationId, selectedProjectId]);
+  }, [inProgressProjectsData, projectId, locationId, selectedProjectId]);
   
   // Fetch the next location number if we're adding a new location
   const { data: nextNumberData } = useQuery({
@@ -506,7 +514,7 @@ const AddLocation = () => {
             </h2>
             
             {/* Project selection dropdown */}
-            {!locationId && inProgressProjects.length > 0 && (
+            {!locationId && inProgressProjectsData && inProgressProjectsData.length > 0 && (
               <div className="w-1/2">
                 <Select
                   value={String(projectId)}
@@ -521,7 +529,7 @@ const AddLocation = () => {
                     <SelectValue placeholder="Select project" />
                   </SelectTrigger>
                   <SelectContent>
-                    {inProgressProjects.map((project: Project) => (
+                    {inProgressProjectsData.map((project: Project) => (
                       <SelectItem key={project.id} value={String(project.id)}>
                         {project.name}
                       </SelectItem>
