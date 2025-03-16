@@ -120,6 +120,8 @@ export class MemStorage implements IStorage {
       groupIdType: insertProject.groupIdType || null,
       description: insertProject.description || null,
       status: insertProject.status || 'in_progress',
+      submitted: insertProject.submitted || false,
+      submittedAt: insertProject.submittedAt || null,
       createdAt: new Date() 
     };
     this.projects.set(id, project);

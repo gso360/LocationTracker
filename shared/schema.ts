@@ -27,6 +27,8 @@ export const projects = pgTable("projects", {
   groupIdType: text("group_id_type"),      // GroupID Type (1-400, S1-X, Custom)
   description: text("description"),        // Additional description
   status: text("status").default('in_progress').notNull(), // Project status: in_progress, completed
+  submitted: boolean("submitted").default(false).notNull(), // Whether project has been submitted
+  submittedAt: timestamp("submitted_at"),  // When the project was submitted
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -39,6 +41,8 @@ export const insertProjectSchema = createInsertSchema(projects).pick({
   groupIdType: true,
   description: true,
   status: true,
+  submitted: true,
+  submittedAt: true,
 });
 
 export type InsertProject = z.infer<typeof insertProjectSchema>;
