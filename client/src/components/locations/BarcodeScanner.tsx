@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { X, QrCode, Check, Bluetooth, ListChecks, Smartphone } from "lucide-react";
+import { X, QrCode, Check, Bluetooth, ListChecks } from "lucide-react";
 import { useBluetoothBarcode, BarcodeListener } from "./BluetoothBarcodeManager";
-import { CapacitorBarcodeService } from "../../services/CapacitorBarcodeService";
 
 interface BarcodeScannerProps {
   onScan: (value: string) => void;
@@ -308,44 +307,20 @@ const ManualBarcodeEntry = ({
 };
 
 const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existingBarcodes = [] }) => {
-  const [lastScannedBarcode, setLastScannedBarcode] = useState<string | null>(null);
-  const [notificationVisible, setNotificationVisible] = useState(false);
   const [showBarcodeInput, setShowBarcodeInput] = useState(true); // Start with barcode input shown
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [scannedCount, setScannedCount] = useState(0);
-  const [isNativeEnv, setIsNativeEnv] = useState(false);
-  const [isScanning, setIsScanning] = useState(false);
   const { startListening, stopListening } = useBluetoothBarcode();
-  
-  // Check if running in a native Capacitor environment
-  useEffect(() => {
-    setIsNativeEnv(CapacitorBarcodeService.isNative());
-  }, []);
   
   // Handle barcode entry from continuous scanner - use useCallback to prevent infinite loops
   const handleBarcodeEntry = useCallback((value: string) => {
     // Prevent processing duplicates
     if (existingBarcodes.includes(value)) {
-      // Show duplicate notification
-      setLastScannedBarcode(value);
-      setNotificationVisible(true);
-      
-      // Hide notification after 2 seconds
-      setTimeout(() => {
-        setNotificationVisible(false);
-      }, 2000);
       return;
     }
     
-    // Show success notification
-    setLastScannedBarcode(value);
-    setNotificationVisible(true);
+    // Increment the count of scanned barcodes
     setScannedCount(prev => prev + 1);
-    
-    // Hide notification after 2 seconds
-    setTimeout(() => {
-      setNotificationVisible(false);
-    }, 2000);
     
     // Pass the barcode to parent component
     onScan(value);
@@ -361,79 +336,18 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existi
   }, [handleBarcodeEntry]);
   
   useEffect(() => {
-    // Only use Bluetooth listener if not in native environment
-    if (!isNativeEnv && showBarcodeInput) {
+    // Always use Bluetooth listener regardless of environment
+    if (showBarcodeInput) {
       // Use the ref's current value instead of the callback directly
       startListening((barcode: string) => handleBarcodeEntryRef.current(barcode));
-    } else if (!isNativeEnv) {
+    } else {
       stopListening();
     }
     
     return () => {
-      if (!isNativeEnv) {
-        stopListening();
-      }
+      stopListening();
     };
-  }, [showBarcodeInput, startListening, stopListening, isNativeEnv]);
-  
-  // Function to trigger native barcode scanning
-  const handleNativeScan = async () => {
-    if (!isNativeEnv || isScanning) return;
-    
-    try {
-      setIsScanning(true);
-      const barcode = await CapacitorBarcodeService.scanBarcode();
-      setIsScanning(false);
-      
-      if (barcode) {
-        handleBarcodeEntry(barcode);
-      }
-    } catch (error) {
-      console.error('Error with native barcode scanning:', error);
-      setIsScanning(false);
-    }
-  };
-  
-  // Native camera UI component
-  const NativeCameraUI = () => (
-    <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 p-4">
-      <div className="text-center mb-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Native Barcode Scanner</h3>
-        <p className="text-sm text-gray-600">
-          Take a photo of a barcode to scan it using the native camera.
-        </p>
-      </div>
-      
-      <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center mb-6">
-        <Smartphone className="h-16 w-16 text-gray-500" />
-      </div>
-      
-      <button 
-        onClick={handleNativeScan}
-        disabled={isScanning}
-        className={`px-6 py-3 rounded-lg bg-[#2962FF] text-white flex items-center justify-center text-lg font-medium shadow-lg ${isScanning ? 'opacity-70' : ''}`}
-      >
-        {isScanning ? 'Opening Camera...' : 'Open Camera to Scan'}
-      </button>
-      
-      <button 
-        onClick={() => setShowManualEntry(true)}
-        className="mt-4 text-[#2962FF] underline"
-      >
-        Enter manually
-      </button>
-      
-      {/* Recently scanned barcodes display */}
-      {scannedCount > 0 && (
-        <div className="w-full mt-8">
-          <div className="text-sm font-medium text-gray-700 mb-2 flex items-center">
-            <ListChecks className="h-4 w-4 mr-1" />
-            Scanned Barcodes: {scannedCount}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  }, [showBarcodeInput, startListening, stopListening]);
   
   return (
     <div className="h-full flex flex-col">
@@ -444,22 +358,14 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose, existi
         <h2 className="text-lg font-medium">Scan Barcodes</h2>
       </div>
       
-      {isNativeEnv ? (
-        // Native camera interface
-        <NativeCameraUI />
-      ) : (
-        // Web camera interface
-        <>
-          <BarcodeScanForm 
-            onSubmit={handleBarcodeEntry}
-            onDone={onClose}
-            onCancel={() => setShowBarcodeInput(false)}
-            existingBarcodes={existingBarcodes}
-            onShowManualEntry={() => setShowManualEntry(true)}
-            scannedCount={scannedCount}
-          />
-        </>
-      )}
+      <BarcodeScanForm 
+        onSubmit={handleBarcodeEntry}
+        onDone={onClose}
+        onCancel={() => setShowBarcodeInput(false)}
+        existingBarcodes={existingBarcodes}
+        onShowManualEntry={() => setShowManualEntry(true)}
+        scannedCount={scannedCount}
+      />
       
       {showManualEntry && (
         <ManualBarcodeEntry 
