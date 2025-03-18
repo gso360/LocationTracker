@@ -12,6 +12,19 @@
         "approvedAt": "2025-03-16T12:00:00.000Z",
         "approvedBy": null
       }
+    ],
+    [
+      2,
+      {
+        "id": 2,
+        "username": "gsheridan@gso360.com",
+        "password": "$2b$10$h42RV6r.GWxlT5oY05g99uQ.TTeUStnEKZtVAvnalqpdjACkhExAK",
+        "role": "user",
+        "approved": true,
+        "createdAt": "2025-03-18T01:23:40.356Z",
+        "approvedAt": "2025-03-18T01:26:16.889Z",
+        "approvedBy": 1
+      }
     ]
   ],
   "projects": [
@@ -47,8 +60,26 @@
         "status": "in_progress",
         "submitted": false,
         "submittedAt": null,
-        "lastAccessedAt": "2025-03-16T23:44:29.615Z",
+        "lastAccessedAt": "2025-03-18T01:30:28.780Z",
         "createdAt": "2025-03-16T19:28:34.225Z"
+      }
+    ],
+    [
+      5,
+      {
+        "id": 5,
+        "name": "Test showroom iOS",
+        "lineVendor": null,
+        "scannerName": "Glenn Sheridan",
+        "tourId": null,
+        "scanDate": "2025-03-18",
+        "groupIdType": null,
+        "description": null,
+        "status": "in_progress",
+        "submitted": false,
+        "submittedAt": null,
+        "lastAccessedAt": "2025-03-18T01:27:28.290Z",
+        "createdAt": "2025-03-18T01:27:20.406Z"
       }
     ]
   ],
@@ -159,6 +190,18 @@
         "pinPlacement": null,
         "projectId": 4,
         "createdAt": "2025-03-16T23:44:29.426Z"
+      }
+    ],
+    [
+      14,
+      {
+        "id": 14,
+        "name": "7",
+        "notes": null,
+        "imageData": null,
+        "pinPlacement": null,
+        "projectId": 4,
+        "createdAt": "2025-03-18T01:30:28.679Z"
       }
     ]
   ],
@@ -347,9 +390,9 @@
       }
     ]
   ],
-  "currentUserId": 2,
-  "currentProjectId": 5,
-  "currentLocationId": 14,
+  "currentUserId": 3,
+  "currentProjectId": 6,
+  "currentLocationId": 15,
   "currentBarcodeId": 15,
   "currentReportId": 8
 }

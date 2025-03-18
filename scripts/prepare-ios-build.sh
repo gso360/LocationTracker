@@ -26,7 +26,8 @@ fi
 
 # Build the web app
 echo -e "\n${BLUE}Building web application...${NC}"
-npm run build
+echo -e "${BLUE}Using NPX to ensure vite is available...${NC}"
+npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error: Web build failed.${NC}"
     exit 1
