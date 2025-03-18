@@ -7,7 +7,9 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: 'https',
     iosScheme: 'https',
-    hostname: 'app'
+    hostname: 'app',
+    url: process.env.REPLIT_DOMAIN ? `https://${process.env.REPLIT_DOMAIN}` : undefined,
+    cleartext: true
   },
   plugins: {
     SplashScreen: {
@@ -23,7 +25,9 @@ const config: CapacitorConfig = {
     contentInset: 'always',
     allowsLinkPreview: false,
     scrollEnabled: true,
-    limitsNavigationsToAppBoundDomains: true
+    limitsNavigationsToAppBoundDomains: false,  // Allow external connections
+    backgroundColor: "#FFFFFF",
+    scheme: "app"
   }
 };
 
