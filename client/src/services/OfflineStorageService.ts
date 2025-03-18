@@ -171,7 +171,7 @@ class OfflineStorage {
     };
 
     // Save to local storage
-    const id = await this.db.add('locations', locationWithMeta);
+    const id = await this.db.add('locations', locationWithMeta) as number;
 
     // Add to sync queue if online
     await this.db.add('syncQueue', {
@@ -204,7 +204,7 @@ class OfflineStorage {
     };
 
     // Save to local storage
-    const id = await this.db.add('barcodes', barcodeWithMeta);
+    const id = await this.db.add('barcodes', barcodeWithMeta) as number;
 
     // Add to sync queue if online
     await this.db.add('syncQueue', {
