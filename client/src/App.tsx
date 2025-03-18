@@ -18,6 +18,7 @@ import WelcomeTour from "./components/WelcomeTour";
 import { AuthProvider, useAuth, withAuth } from "./contexts/AuthContext";
 import { TourProvider } from "./contexts/TourContext";
 import "./styles/tour.css";
+import "./styles/transitions.css";
 
 // Wrap components that require authentication
 const ProtectedProjects = withAuth(Projects);
