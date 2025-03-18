@@ -1,210 +1,191 @@
-# iOS App Development Guide
+# iOS Native Features Guide
 
-This guide provides detailed instructions for setting up and running the Showroom Inventory Manager app in Xcode as a native iOS application.
+This document explains the iOS-specific features implemented in the Showroom Manager application and how to use them effectively.
 
-## Prerequisites
+## iOS Native Integrations
 
-Before starting, ensure you have:
+The application leverages Capacitor plugins to provide native iOS functionality while maintaining cross-platform compatibility.
 
-- macOS computer with the latest version
-- Xcode 14.0 or higher installed
-- Node.js 18.0 or higher installed
-- CocoaPods installed (`sudo gem install cocoapods`)
-- An Apple Developer account (for deployment to physical devices and App Store)
+### Camera Integration
 
-## Initial Setup
+The app uses the Capacitor Camera plugin for taking location photos.
 
-1. Clone the repository from GitHub and install dependencies:
+#### Implementation Details
 
-```bash
-git clone [your-repo-url]
-cd [your-project-directory]
-npm install
+- The `CapacitorCameraService` handles photo capture through the native camera
+- Photos are processed and stored as base64 strings for cross-platform compatibility
+- Privacy permissions are automatically requested when the camera is first used
+
+```typescript
+// Example usage:
+import { CapacitorCameraService } from '@/services/CapacitorCameraService';
+
+// Request permissions first
+await CapacitorCameraService.requestPermissions();
+
+// Take a photo and get result as base64 string
+const imageData = await CapacitorCameraService.takePhoto();
 ```
 
-2. Install Capacitor CLI globally (if not already installed):
+#### Camera Configuration
 
-```bash
-npm install -g @capacitor/cli
+The following camera options are configured in `capacitor.config.ts`:
+
+- Photos are taken at 90% quality for high-resolution location images
+- Photos are not automatically saved to the device gallery (saveToGallery: false)
+- The camera interface uses fullscreen presentation style
+- Images are resized to 1024x1024 pixels to maintain consistent storage requirements
+
+### Barcode Scanning
+
+The app implements barcode scanning through the native camera when running as an iOS app.
+
+#### Implementation Details
+
+- The `CapacitorBarcodeService` handles barcode scanning through the native camera
+- Barcode detection uses the ZXing library through `BrowserMultiFormatReader`
+- The process involves taking a photo with the native camera and then analyzing it for barcodes
+- The implementation handles all necessary image processing (creating canvas, drawing image, extracting data)
+
+```typescript
+// Example usage:
+import { CapacitorBarcodeService } from '@/services/CapacitorBarcodeService';
+
+// Request permissions first
+await CapacitorBarcodeService.requestPermissions();
+
+// Scan a barcode and get the value
+const barcodeValue = await CapacitorBarcodeService.scanBarcode();
 ```
 
-## Building for iOS
+### Bluetooth Connectivity
 
-1. Build the web application:
+The application supports external Bluetooth barcode scanners for more efficient barcode capture.
 
-```bash
-npm run build
+#### Implementation Details
+
+- The `BluetoothBarcodeProvider` manages Bluetooth scanner connectivity
+- Scanners are detected as HID (Human Interface Device) keyboard inputs
+- Barcode input is captured and processed in real-time
+
+```typescript
+// Example usage:
+import { useBluetoothBarcode, BarcodeListener } from '@/components/locations/BluetoothBarcodeManager';
+
+// In a component
+const { isListening, startListening, stopListening } = useBluetoothBarcode();
+
+// Start listening for barcode scans
+startListening((barcode) => {
+  console.log('Scanned barcode:', barcode);
+  // Process barcode...
+});
+
+// Or use the BarcodeListener component
+<BarcodeListener 
+  active={true} 
+  onScan={(barcode) => processBarcode(barcode)}
+>
+  {/* Child components */}
+</BarcodeListener>
 ```
 
-2. Initialize and sync Capacitor (first time only):
+### Deep Linking
 
-```bash
-npx cap sync ios
+The app supports deep linking to allow opening specific pages from external sources.
+
+#### Implementation Details
+
+- The app uses a custom URL scheme defined in `capacitor.config.ts`
+- Links using the `app://` scheme can be handled by the application
+- Route handling is managed through the app's router
+
+### Offline Support
+
+The application implements robust offline support for field use.
+
+#### Implementation Details
+
+- The `OfflineStorageService` manages data persistence when offline
+- IndexedDB is used for storing location data, photos, and barcodes
+- Data is automatically synchronized when the device regains connectivity
+
+```typescript
+// Example offline storage usage:
+import { offlineStorage } from '@/services/OfflineStorageService';
+
+// Save location data offline
+const locationId = await offlineStorage.saveLocation({
+  name: 'New Location',
+  projectId: 123,
+  // other location data...
+});
+
+// Save barcode data offline
+const barcodeId = await offlineStorage.saveBarcode({
+  value: '123456789',
+  locationId: locationId,
+  // other barcode data...
+});
+
+// Check for pending changes
+const hasPendingChanges = await offlineStorage.hasPendingChanges();
 ```
 
-3. Open the project in Xcode:
+## iOS-Specific UI Considerations
 
-```bash
-npx cap open ios
-```
+### Safe Areas and Notches
 
-## Xcode Configuration
+The application respects iOS safe areas to ensure content isn't obscured by notches, home indicators, or system bars.
 
-Once the project is open in Xcode, you need to:
+- Bottom navigation uses safe area insets
+- Forms and content maintain proper margins
+- Modals and dialogs avoid system UI elements
 
-1. **Set up your Team for signing**:
-   - Click on the project name in the Project Navigator
-   - Select the app target
-   - In the "Signing & Capabilities" tab, select your team from the dropdown
+### Gesture Navigation
 
-2. **Update Bundle Identifier** (optional):
-   - The default is `com.showroommanager.app`
-   - You can customize this based on your organization
+The app supports iOS gesture navigation:
 
-3. **Privacy Descriptions**:
-   - Ensure the following entries are in your Info.plist:
-     - NSCameraUsageDescription
-     - NSPhotoLibraryUsageDescription
-     - NSPhotoLibraryAddUsageDescription
-     - NSLocationWhenInUseUsageDescription
-     - NSBluetoothAlwaysUsageDescription (if using Bluetooth scanners)
+- Swipe back to navigate to previous screens
+- Pull to refresh for data updates
+- Scroll bounce effects
 
-## Running on Simulator
+### Keyboard Handling
 
-1. In Xcode, select a simulator from the device dropdown
-2. Click the Run button (▶️) or press Cmd+R
-3. Wait for the simulator to launch and the app to install
+Special considerations for iOS keyboard behavior:
 
-## Running on Physical Device
+- Input fields adjust when keyboard appears
+- Forms scroll to keep the active field visible
+- Dismiss keyboard on tap outside or form submission
 
-1. Connect your iOS device to your Mac
-2. Select your device from the device dropdown in Xcode
-3. Ensure you've set up your team for signing
-4. Click the Run button (▶️) or press Cmd+R
-5. You may need to trust the developer certificate on your device
+## Testing iOS-Specific Features
 
-## Updating Web Code
+### On Simulator
 
-When you make changes to the web code:
+Most features can be tested on the iOS simulator:
 
-1. Rebuild the web application:
+1. Camera functionality can be simulated with pre-recorded images
+2. Barcode scanning can be tested with sample images
+3. Offline mode can be tested by disabling network in simulator settings
 
-```bash
-npm run build
-```
+### On Physical Devices
 
-2. Sync the changes to the iOS project:
+For complete testing, use physical iOS devices:
 
-```bash
-npx cap sync ios
-```
+1. Test camera functionality with actual locations
+2. Test barcode scanning with real barcodes
+3. Test Bluetooth connectivity with external scanners
+4. Verify offline functionality by enabling airplane mode
 
-3. If Xcode is already open, you can simply Cmd+R to run with the updated web code
+## Known iOS-Specific Issues
 
-## Configuration Files
+1. **Camera Permission Dialogs**: iOS may show permission dialogs multiple times if the user doesn't select "Allow" initially
+2. **Bluetooth Scanner Connectivity**: Some Bluetooth scanners may require specific pairing procedures
+3. **Keyboard Height**: The virtual keyboard may sometimes overlap with input fields on smaller devices
 
-Important files for iOS configuration:
+## iOS Version Compatibility
 
-- **capacitor.config.ts**: Main Capacitor configuration
-- **ios/App/App/Info.plist**: iOS app information and permissions
-- **ios/App/App/capacitor.config.json**: Generated Capacitor config for iOS
-
-## Native Plugin Integration
-
-The app uses several Capacitor plugins:
-
-- **@capacitor/camera**: For taking photos of locations
-- **@capacitor/core**: Core Capacitor functionality
-- **@capacitor/ios**: iOS-specific Capacitor code
-
-Custom native integrations:
-
-- **CapacitorCameraService**: Native camera handling
-- **CapacitorBarcodeService**: Barcode scanning with native camera
-
-## Debugging iOS Issues
-
-If you encounter problems:
-
-1. **Camera not working**:
-   - Check Info.plist for proper privacy descriptions
-   - Verify Camera plugin permissions are requested
-   - Try different iOS device or simulator
-
-2. **Barcode scanning issues**:
-   - Test in good lighting conditions
-   - Check image capture settings
-   - Verify ZXing library integration
-
-3. **Network connectivity**:
-   - Check ATS settings in Info.plist
-   - Verify server URL in capacitor.config.ts
-   - Test API endpoints separately
-
-4. **App crashes**:
-   - Check Xcode console for error messages
-   - Inspect Safari web inspector for JavaScript errors
-   - Look for any Capacitor plugin errors
-
-## App Store Submission
-
-To prepare for App Store submission:
-
-1. Update app version in capacitor.config.ts
-2. Ensure all privacy descriptions are properly filled
-3. Create App Store screenshots for different device sizes
-4. Generate app icons using appropriate tools
-5. Set up App Store Connect with your app details
-6. Archive your app in Xcode and upload to App Store Connect
-
-## App Icon and Splash Screen
-
-Icons and splash screens are located in:
-
-- ios/App/App/Assets.xcassets/AppIcon.appiconset/
-- ios/App/App/Assets.xcassets/Splash.imageset/
-
-You can update these with your own branded assets.
-
-## Advanced Usage
-
-### Live Reload During Development
-
-For faster development with live reload:
-
-```bash
-npm run dev
-npx cap run ios --livereload --external
-```
-
-### Custom Capacitor Plugins
-
-If you need to create custom native functionality:
-
-1. Create a plugin structure in a separate directory
-2. Implement iOS native code in Swift
-3. Create JavaScript interface
-4. Add to your project with npm link or as a local dependency
-
-## Common Issues and Solutions
-
-1. **"App not working with iOS 16+"**:
-   - Update Capacitor to latest version
-   - Check for deprecated APIs
-   - Update Swift version in podfile
-
-2. **White screen on app launch**:
-   - Check for JavaScript errors
-   - Verify correct WKWebView configuration
-   - Make sure web assets are properly bundled
-
-3. **Permissions dialogs not showing**:
-   - Verify Info.plist has proper usage descriptions
-   - Check Capacitor plugin initialization
-   - Test on physical device (some permissions don't work in simulator)
-
-## Resources
-
-- [Capacitor Documentation](https://capacitorjs.com/docs)
-- [Apple Developer Documentation](https://developer.apple.com/documentation/)
-- [Swift Programming Guide](https://swift.org/documentation/)
+- The app is designed to work on iOS 13.0 and above, as specified in the app manifest
+- Optimal performance is achieved on iOS 15.0+
+- The app leverages Capacitor 7.x which provides enhanced support for modern iOS versions
+- App deployment requires Xcode 15+ for development and distribution

@@ -1,111 +1,157 @@
-# Showroom Inventory Manager - iOS App
+# iOS Deployment Guide
 
-This README provides instructions for working with the native iOS version of the Showroom Inventory Manager application.
+This guide provides instructions for building, configuring, and deploying the Showroom Manager application to iOS devices.
 
-## Project Overview
+## Prerequisites
 
-The Showroom Inventory Manager iOS app is built using:
+Before you begin, ensure you have the following:
 
-- **React** for the UI and application logic
-- **Capacitor** for wrapping the web app into a native iOS container
-- **Native iOS APIs** for camera and barcode scanning
-- **Express.js** backend for data management
+- A Mac computer with macOS 10.15 (Catalina) or newer
+- Xcode 12 or newer installed from the Mac App Store
+- An Apple Developer account (for deploying to physical devices and App Store)
+- Node.js and npm installed
+- CocoaPods installed (`sudo gem install cocoapods`)
 
-## Architecture
+## Setup Process
 
-The application follows a hybrid architecture:
+### 1. Install Required Dependencies
 
-1. **Core Web Application**: The main application is built as a React web app
-2. **Capacitor Bridge**: Provides access to native iOS APIs
-3. **Native Services**: Custom services built to integrate with iOS native features
-4. **iOS Container**: Native iOS shell that hosts the web application
+The application uses Capacitor to bridge between web and native iOS. All required dependencies should already be installed if you're working with the current repository.
 
-## Native Features Implemented
+### 2. Build the Web Application
 
-- **Native Camera Integration**: Using `@capacitor/camera` for taking location photos
-- **Native Barcode Scanning**: Custom implementation using the native camera and image analysis
-- **Native UI Adaptations**: Special UI optimizations when running in native context
-
-## Development Workflow
-
-### Local Development
-
-During development, you can continue working with the web version:
-
-```bash
-npm run dev
-```
-
-### Previewing Native Features
-
-To test native features during development:
-
-1. Make changes to web app code
-2. Build the web app
-3. Sync with Capacitor
-4. Open in Xcode simulator or device
+Build the web application that will be wrapped in the native iOS container:
 
 ```bash
 npm run build
+```
+
+### 3. Add iOS Platform
+
+If you haven't already added the iOS platform to your project:
+
+```bash
+npx cap add ios
+```
+
+### 4. Sync Web Code with iOS
+
+After making changes to your web code, you need to sync those changes to the iOS project:
+
+```bash
 npx cap sync ios
+```
+
+### 5. Open the iOS Project in Xcode
+
+Launch Xcode with the iOS project:
+
+```bash
 npx cap open ios
 ```
 
-### Important Files
+Alternatively, you can use our helper script that handles these steps automatically:
 
-- `capacitor.config.ts`: Main configuration for Capacitor and native features
-- `client/src/services/CapacitorCameraService.ts`: Native camera integration
-- `client/src/services/CapacitorBarcodeService.ts`: Native barcode scanning
-- `ios-app-manifest.json`: iOS app configuration for App Store submission
+```bash
+node scripts/build-ios.js
+```
 
-### Components with Native Integration
+## Xcode Configuration
 
-- `CameraCapture.tsx`: Adapts to use native camera when available
-- `BarcodeScanner.tsx`: Uses native barcode scanning on iOS
+Once the project is open in Xcode, you need to configure several settings:
 
-## Testing Native Features
+### 1. Signing & Capabilities
 
-To properly test native features, you should:
+1. Select the "App" project in the Project Navigator
+2. Select the "App" target
+3. Go to the "Signing & Capabilities" tab
+4. Choose your development team
+5. The bundle identifier should match what's in `capacitor.config.ts`
 
-1. Build the app and run it on an actual iOS device
-2. Test camera functionality in different lighting conditions
-3. Test barcode scanning with various barcode types
-4. Verify Bluetooth scanner integration if applicable
+### 2. Device Orientation
 
-## Building for Production
+By default, the app is configured for portrait orientation only on iPhone and both portrait and landscape on iPad. If you need to change this:
 
-Follow these steps to build the iOS app for production:
+1. Select the "App" project
+2. Select the "App" target
+3. Go to the "General" tab
+4. Scroll to "Deployment Info"
+5. Check/uncheck the desired orientations
 
-1. Update version information in `capacitor.config.ts` and `ios-app-manifest.json`
-2. Build the web app: `npm run build`
-3. Sync with Capacitor: `npx cap sync ios`
-4. Open in Xcode: `npx cap open ios`
-5. Set up signing and team in Xcode
-6. Build an archive for distribution
+### 3. Required App Permissions
+
+The app requires several permissions that are already configured in `Info.plist`:
+
+- Camera access (for taking photos and scanning barcodes)
+- Photo Library access (for saving photos)
+- Bluetooth access (for barcode scanner connectivity)
+- Location access (for associating locations with inventory)
+
+## Running on Simulator
+
+1. In Xcode, select the desired iOS simulator from the device menu
+2. Click the Run button or press Cmd+R
+
+## Running on Physical Device
+
+1. Connect your iOS device to your Mac with a USB cable
+2. Select your device from the device menu in Xcode
+3. Click the Run button or press Cmd+R
+4. You may need to trust the developer certificate on your device
 
 ## Troubleshooting
 
-### Native Camera Not Working
-- Ensure camera permissions are properly requested
-- Verify Info.plist has correct privacy descriptions
-- Check Capacitor configuration
+### Common Issues
 
-### Barcode Scanning Issues
-- Test in well-lit environments
-- Ensure barcode is clearly visible
-- Verify zxing library is properly initialized
+1. **Build fails with signing errors**
+   - Ensure you have selected a valid development team
+   - Check that your Apple Developer account has the necessary permissions
 
-### Xcode Build Errors
-- Check for missing frameworks
-- Verify signing certificate is valid
-- Ensure all dependencies are installed
+2. **App crashes on startup**
+   - Check the Xcode console for error messages
+   - Verify that all required permissions are properly configured in `Info.plist`
 
-## App Store Submission
+3. **Camera or Bluetooth functionality not working**
+   - Ensure the proper usage descriptions are set in `Info.plist`
+   - Verify the app has been granted the necessary permissions in iOS Settings
 
-Refer to the detailed `ios-app-guide.md` for complete App Store submission instructions.
+4. **White screen after launch**
+   - Check for JavaScript errors in the Xcode console
+   - Verify that the web build completed successfully
+   - Ensure Capacitor configuration points to the correct web directory
 
-## Maintenance Notes
+### Debugging Web Content
 
-- Keep Capacitor and plugins updated to latest compatible versions
-- Test thoroughly after updating native dependencies
-- Maintain consistent behavior between web and native experiences
+You can debug the web content running in the iOS app using Safari's Web Inspector:
+
+1. Enable Web Inspector on your iOS device (Settings → Safari → Advanced → Web Inspector)
+2. Connect your device to your Mac
+3. Open Safari on your Mac
+4. Enable the Develop menu (Safari → Preferences → Advanced → Show Develop menu)
+5. Select your device from the Develop menu, then select the app's WebView
+
+## Distribution
+
+### TestFlight
+
+To distribute the app via TestFlight for beta testing:
+
+1. Configure App Store Connect with your app information
+2. In Xcode, select "Generic iOS Device" as the build target
+3. Go to Product → Archive
+4. Once archiving is complete, click "Distribute App"
+5. Select "App Store Connect" and follow the prompts
+
+### App Store
+
+The process for App Store distribution is similar to TestFlight:
+
+1. Ensure your app metadata is complete in App Store Connect
+2. Archive your app as described above
+3. Submit for App Store review through the distribution workflow
+
+## Further Resources
+
+- [Capacitor iOS Documentation](https://capacitorjs.com/docs/ios)
+- [Apple Developer Documentation](https://developer.apple.com/documentation/)
+- [TestFlight Documentation](https://developer.apple.com/testflight/)
